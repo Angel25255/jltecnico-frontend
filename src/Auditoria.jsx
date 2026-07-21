@@ -262,4 +262,4 @@ const estilos = {
     borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem",
   },
   textoPaginacion: { fontSize: "0.82rem", color: "#64748b", fontWeight: 500 },
-};
+}; 
