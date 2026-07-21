@@ -27,13 +27,11 @@ export default function Auditoria({ token }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
-  // Campos del formulario (lo que el usuario está escribiendo)
   const [desde, setDesde] = useState(hoyISO());
   const [hasta, setHasta] = useState(hoyISO());
   const [accion, setAccion] = useState("");
   const [correo, setCorreo] = useState("");
 
-  // Filtros YA APLICADOS (solo cambian al enviar el formulario) + página
   const [filtrosAplicados, setFiltrosAplicados] = useState({
     desde: hoyISO(), hasta: hoyISO(), accion: "", correo: "",
   });
@@ -140,68 +138,109 @@ export default function Auditoria({ token }) {
 
       {error && <p style={estilos.error}>{error}</p>}
 
-      <div style={estilos.tarjetaTabla}>
-        {cargando ? (
-          <p style={estilos.cargandoTexto}>Cargando registros...</p>
-        ) : (
-          <>
-            <div style={{ overflowX: "auto" }}>
-              <table style={estilos.tabla}>
-                <thead>
-                  <tr>
-                    <th style={estilos.th}>Fecha / Hora</th>
-                    <th style={estilos.th}>Acción</th>
-                    <th style={estilos.th}>Usuario</th>
-                    <th style={estilos.th}>IP</th>
-                    <th style={estilos.th}>Detalle</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.length === 0 && (
-                    <tr><td colSpan={5} style={estilos.tdVacio}>No hay registros con esos filtros.</td></tr>
+      {cargando ? (
+        <p style={estilos.cargandoTexto}>Cargando registros...</p>
+      ) : (
+        <>
+          {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+          <div className="vista-tarjetas-movil">
+            {logs.length === 0 && (
+              <p style={estilos.tdVacioMovil}>No hay registros con esos filtros.</p>
+            )}
+            {logs.map((log) => {
+              const color = COLOR_ACCION[log.accion] || { bg: "#f1f5f9", texto: "#334155" };
+              return (
+                <div key={log.id} style={estilos.tarjetaLog}>
+                  <div style={estilos.tarjetaLogEncabezado}>
+                    <span style={{ ...estilos.badge, background: color.bg, color: color.texto }}>
+                      {log.accion}
+                    </span>
+                    <span style={estilos.tarjetaLogFecha}>
+                      {new Date(log.fechaHora).toLocaleString("es-PE")}
+                    </span>
+                  </div>
+                  <div style={estilos.tarjetaLogFila}>
+                    <span>Usuario</span>
+                    <span>{log.nombreUsuario || log.correoIntento || "—"}</span>
+                  </div>
+                  <div style={estilos.tarjetaLogFila}>
+                    <span>IP</span>
+                    <code style={estilos.codigo}>{log.ip || "—"}</code>
+                  </div>
+                  {log.detalle && (
+                    <div style={estilos.tarjetaLogDetalle}>{log.detalle}</div>
                   )}
-                  {logs.map((log) => {
-                    const color = COLOR_ACCION[log.accion] || { bg: "#f1f5f9", texto: "#334155" };
-                    return (
-                      <tr key={log.id} style={estilos.filaTabla}>
-                        <td style={estilos.td}>{new Date(log.fechaHora).toLocaleString("es-PE")}</td>
-                        <td style={estilos.td}>
-                          <span style={{ ...estilos.badge, background: color.bg, color: color.texto }}>
-                            {log.accion}
-                          </span>
-                        </td>
-                        <td style={estilos.td}>{log.nombreUsuario || log.correoIntento || "—"}</td>
-                        <td style={estilos.td}><code style={estilos.codigo}>{log.ip || "—"}</code></td>
-                        <td style={estilos.td}>{log.detalle || "—"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              );
+            })}
+          </div>
 
-            <div style={estilos.paginacion}>
-              <button
-                disabled={pagina <= 1}
-                onClick={() => setPagina((p) => p - 1)}
-                style={{ ...estilos.botonPaginacion, opacity: pagina <= 1 ? 0.4 : 1 }}
-              >
-                ← Anterior
-              </button>
-              <span style={estilos.textoPaginacion}>
-                Página {pagina} de {totalPaginas}
-              </span>
-              <button
-                disabled={pagina >= totalPaginas}
-                onClick={() => setPagina((p) => p + 1)}
-                style={{ ...estilos.botonPaginacion, opacity: pagina >= totalPaginas ? 0.4 : 1 }}
-              >
-                Siguiente →
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+          {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+          <div style={estilos.tarjetaTabla} className="vista-tabla-escritorio">
+            <table style={estilos.tabla}>
+              <thead>
+                <tr>
+                  <th style={estilos.th}>Fecha / Hora</th>
+                  <th style={estilos.th}>Acción</th>
+                  <th style={estilos.th}>Usuario</th>
+                  <th style={estilos.th}>IP</th>
+                  <th style={estilos.th}>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.length === 0 && (
+                  <tr><td colSpan={5} style={estilos.tdVacio}>No hay registros con esos filtros.</td></tr>
+                )}
+                {logs.map((log) => {
+                  const color = COLOR_ACCION[log.accion] || { bg: "#f1f5f9", texto: "#334155" };
+                  return (
+                    <tr key={log.id} style={estilos.filaTabla}>
+                      <td style={estilos.td}>{new Date(log.fechaHora).toLocaleString("es-PE")}</td>
+                      <td style={estilos.td}>
+                        <span style={{ ...estilos.badge, background: color.bg, color: color.texto }}>
+                          {log.accion}
+                        </span>
+                      </td>
+                      <td style={estilos.td}>{log.nombreUsuario || log.correoIntento || "—"}</td>
+                      <td style={estilos.td}><code style={estilos.codigo}>{log.ip || "—"}</code></td>
+                      <td style={estilos.td}>{log.detalle || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación - se ve siempre, en ambas vistas */}
+          <div style={estilos.paginacion}>
+            <button
+              disabled={pagina <= 1}
+              onClick={() => setPagina((p) => p - 1)}
+              style={{ ...estilos.botonPaginacion, opacity: pagina <= 1 ? 0.4 : 1 }}
+            >
+              ← Anterior
+            </button>
+            <span style={estilos.textoPaginacion}>
+              Página {pagina} de {totalPaginas}
+            </span>
+            <button
+              disabled={pagina >= totalPaginas}
+              onClick={() => setPagina((p) => p + 1)}
+              style={{ ...estilos.botonPaginacion, opacity: pagina >= totalPaginas ? 0.4 : 1 }}
+            >
+              Siguiente →
+            </button>
+          </div>
+        </>
+      )}
+
+      <style>{`
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -237,12 +276,20 @@ const estilos = {
     borderRadius: "7px", cursor: "pointer", fontSize: "0.85rem",
   },
   error: { color: "#dc2626", fontSize: "0.85rem" },
+
+  cargandoTexto: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8", fontSize: "0.9rem" },
+  tarjetaLog: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaLogEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexWrap: "wrap", gap: "6px" },
+  tarjetaLogFecha: { fontSize: "0.75rem", color: "#94a3b8" },
+  tarjetaLogFila: { display: "flex", justifyContent: "space-between", fontSize: "0.83rem", color: "#334155", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+  tarjetaLogDetalle: { marginTop: "8px", fontSize: "0.8rem", color: "#64748b", background: "#f8fafc", padding: "8px 10px", borderRadius: "6px" },
+
   tarjetaTabla: {
     background: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0",
     overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
   },
-  cargandoTexto: { padding: "30px", textAlign: "center", color: "#94a3b8" },
-  tabla: { width: "100%", borderCollapse: "collapse", minWidth: "720px" },
+  tabla: { width: "100%", borderCollapse: "collapse" },
   th: {
     textAlign: "left", padding: "12px 16px", fontSize: "0.75rem", color: "#64748b",
     borderBottom: "1px solid #e2e8f0", background: "#f8fafc",
@@ -253,9 +300,11 @@ const estilos = {
   tdVacio: { padding: "40px", textAlign: "center", color: "#94a3b8", fontSize: "0.9rem" },
   badge: { fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", display: "inline-block" },
   codigo: { fontFamily: "monospace", fontSize: "0.8rem", color: "#64748b" },
+
   paginacion: {
     display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "center",
     padding: "14px 16px", borderTop: "1px solid #e2e8f0", background: "#f8fafc",
+    borderRadius: "0 0 12px 12px", marginTop: "-1px",
   },
   botonPaginacion: {
     background: "#fff", border: "1px solid #cbd5e1", padding: "7px 14px",
