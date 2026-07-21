@@ -314,7 +314,7 @@ function App() {
           .sidebar-escritorio { display: none !important; }
           .barra-movil { display: flex !important; }
           .menu-movil-pantalla { display: flex !important; }
-          .contenido-app { padding-bottom: 76px !important; }
+          .contenido-app { padding-bottom: 76px !important; margin-left: 0 !important; }
         }
       `}</style>
     </div>
@@ -515,9 +515,11 @@ const estilos = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    position: "sticky",
+    position: "fixed",
     top: 0,
+    left: 0,
     height: "100vh",
+    zIndex: 100,
   },
   logoBox: {
     display: "flex",
@@ -650,6 +652,8 @@ const estilos = {
   contenido: {
     flex: 1,
     padding: "0",
+    marginLeft: SIDEBAR_ANCHO,
+    minHeight: "100vh",
   },
 
   // ---------------- Barra inferior móvil ----------------
