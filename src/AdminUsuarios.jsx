@@ -205,7 +205,7 @@ export default function AdminUsuarios({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor} className="modulo-responsive">
+    <div style={estilos.contenedor}>
       <div style={estilos.encabezado}>
         <h3 style={{ margin: 0 }}>Administración de Usuarios</h3>
         <button style={estilos.botonPrimario} onClick={abrirModal}>+ Nuevo usuario</button>
@@ -219,105 +219,62 @@ export default function AdminUsuarios({ token }) {
       {cargando ? (
         <p>Cargando usuarios...</p>
       ) : (
-        <>
-          {/* Vista de TARJETAS - solo se ve en celular */}
-          <div className="vista-tarjetas-movil">
-            {usuarios.map((u) => (
-              <div key={u.id} style={estilos.tarjetaUsuario}>
-                <div style={estilos.tarjetaEncabezado}>
-                  <div>
-                    <strong style={estilos.tarjetaNombre}>{u.nombreCompleto}</strong>
-                    <div style={estilos.tarjetaCorreo}>{u.correo}</div>
-                  </div>
-                  <span style={u.activo ? estilos.badgeActivo : estilos.badgeInactivo}>
-                    {u.activo ? "Activo" : "Desactivado"}
-                  </span>
-                </div>
-                <div style={estilos.tarjetaFila}><span>Dirección</span><span>{u.direccion || "—"}</span></div>
-                <div style={estilos.tarjetaFila}><span>Rol</span><span>{u.rol}</span></div>
-                <div style={estilos.tarjetaBotones}>
-                  <IconoBoton titulo="Editar usuario" onClick={() => abrirEditar(u)} color="#334155" bg="#f1f5f9">✏️</IconoBoton>
-                  <IconoBoton titulo="Restablecer contraseña" onClick={() => abrirRestablecerPassword(u)} color="#92400e" bg="#fffbeb">🔑</IconoBoton>
-                  <IconoBoton
-                    titulo="Regenerar código 2FA"
-                    onClick={() => manejarRegenerar2FA(u)}
-                    disabled={regenerando2FA === u.id}
-                    color="#1d4ed8" bg="#eff6ff"
-                  >
-                    {regenerando2FA === u.id ? "…" : "📱"}
-                  </IconoBoton>
-                  <IconoBoton
-                    titulo={u.activo ? "Desactivar" : "Activar"}
-                    onClick={() => manejarCambiarEstado(u)}
-                    disabled={cambiandoEstadoId === u.id}
-                    color={u.activo ? "#b91c1c" : "#166534"}
-                    bg={u.activo ? "#fee2e2" : "#dcfce7"}
-                  >
-                    {cambiandoEstadoId === u.id ? "…" : u.activo ? "🚫" : "✓"}
-                  </IconoBoton>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Vista de TABLA - solo se ve en pantallas grandes */}
-          <div style={estilos.contenedorTabla} className="vista-tabla-escritorio">
-            <table style={estilos.tabla}>
-              <thead>
-                <tr>
-                  <th style={estilos.th}>Nombre</th>
-                  <th style={estilos.th}>Correo</th>
-                  <th style={estilos.th}>Dirección</th>
-                  <th style={estilos.th}>Rol</th>
-                  <th style={estilos.th}>Estado</th>
-                  <th style={estilos.thAccion}>Acciones</th>
+        <div style={estilos.contenedorTabla}>
+          <table style={estilos.tabla}>
+            <thead>
+              <tr>
+                <th style={estilos.th}>Nombre</th>
+                <th style={estilos.th}>Correo</th>
+                <th style={estilos.th}>Dirección</th>
+                <th style={estilos.th}>Rol</th>
+                <th style={estilos.th}>Estado</th>
+                <th style={estilos.thAccion}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((u) => (
+                <tr key={u.id}>
+                  <td style={estilos.td}>{u.nombreCompleto}</td>
+                  <td style={estilos.td}>{u.correo}</td>
+                  <td style={estilos.td}>{u.direccion || "—"}</td>
+                  <td style={estilos.td}>{u.rol}</td>
+                  <td style={estilos.td}>
+                    <span style={u.activo ? estilos.badgeActivo : estilos.badgeInactivo}>
+                      {u.activo ? "Activo" : "Desactivado"}
+                    </span>
+                  </td>
+                  <td style={estilos.td}>
+                    <div style={estilos.grupoIconos}>
+                      <IconoBoton titulo="Editar usuario" onClick={() => abrirEditar(u)} color="#334155" bg="#f1f5f9">
+                        ✏️
+                      </IconoBoton>
+                      <IconoBoton titulo="Restablecer contraseña" onClick={() => abrirRestablecerPassword(u)} color="#92400e" bg="#fffbeb">
+                        🔑
+                      </IconoBoton>
+                      <IconoBoton
+                        titulo="Regenerar código 2FA (si perdió el celular)"
+                        onClick={() => manejarRegenerar2FA(u)}
+                        disabled={regenerando2FA === u.id}
+                        color="#1d4ed8" bg="#eff6ff"
+                      >
+                        {regenerando2FA === u.id ? "…" : "📱"}
+                      </IconoBoton>
+                      <IconoBoton
+                        titulo={u.activo ? "Desactivar usuario" : "Activar usuario"}
+                        onClick={() => manejarCambiarEstado(u)}
+                        disabled={cambiandoEstadoId === u.id}
+                        color={u.activo ? "#b91c1c" : "#166534"}
+                        bg={u.activo ? "#fee2e2" : "#dcfce7"}
+                      >
+                        {cambiandoEstadoId === u.id ? "…" : u.activo ? "🚫" : "✓"}
+                      </IconoBoton>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {usuarios.map((u) => (
-                  <tr key={u.id}>
-                    <td style={estilos.td}>{u.nombreCompleto}</td>
-                    <td style={estilos.td}>{u.correo}</td>
-                    <td style={estilos.td}>{u.direccion || "—"}</td>
-                    <td style={estilos.td}>{u.rol}</td>
-                    <td style={estilos.td}>
-                      <span style={u.activo ? estilos.badgeActivo : estilos.badgeInactivo}>
-                        {u.activo ? "Activo" : "Desactivado"}
-                      </span>
-                    </td>
-                    <td style={estilos.td}>
-                      <div style={estilos.grupoIconos}>
-                        <IconoBoton titulo="Editar usuario" onClick={() => abrirEditar(u)} color="#334155" bg="#f1f5f9">
-                          ✏️
-                        </IconoBoton>
-                        <IconoBoton titulo="Restablecer contraseña" onClick={() => abrirRestablecerPassword(u)} color="#92400e" bg="#fffbeb">
-                          🔑
-                        </IconoBoton>
-                        <IconoBoton
-                          titulo="Regenerar código 2FA (si perdió el celular)"
-                          onClick={() => manejarRegenerar2FA(u)}
-                          disabled={regenerando2FA === u.id}
-                          color="#1d4ed8" bg="#eff6ff"
-                        >
-                          {regenerando2FA === u.id ? "…" : "📱"}
-                        </IconoBoton>
-                        <IconoBoton
-                          titulo={u.activo ? "Desactivar usuario" : "Activar usuario"}
-                          onClick={() => manejarCambiarEstado(u)}
-                          disabled={cambiandoEstadoId === u.id}
-                          color={u.activo ? "#b91c1c" : "#166534"}
-                          bg={u.activo ? "#fee2e2" : "#dcfce7"}
-                        >
-                          {cambiandoEstadoId === u.id ? "…" : u.activo ? "🚫" : "✓"}
-                        </IconoBoton>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* ---------------- MODAL: Crear nuevo usuario ---------------- */}
@@ -497,21 +454,13 @@ export default function AdminUsuarios({ token }) {
           </div>
         </div>
       )}
-
-      <style>{`
-        .vista-tarjetas-movil { display: none; }
-        @media (max-width: 640px) {
-          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
-          .vista-tabla-escritorio { display: none; }
-        }
-      `}</style>
     </div>
   );
 }
 
 const estilos = {
   contenedor: { padding: "1.5rem", maxWidth: "1050px" },
-  encabezado: { display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
+  encabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
   botonPrimario: { background: "#1d4ed8", color: "#fff", border: "none", padding: "10px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: 600 },
   botonSecundario: { background: "transparent", border: "1px solid #cbd5e1", padding: "10px 16px", borderRadius: "8px", cursor: "pointer" },
   textoAyuda: { fontSize: "0.85rem", color: "#475569" },
@@ -532,13 +481,6 @@ const estilos = {
     display: "flex", alignItems: "center", justifyContent: "center",
     cursor: "pointer", fontSize: "0.95rem",
   },
-
-  tarjetaUsuario: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
-  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
-  tarjetaNombre: { fontSize: "0.95rem", color: "#1e293b" },
-  tarjetaCorreo: { fontSize: "0.78rem", color: "#64748b" },
-  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
-  tarjetaBotones: { display: "flex", gap: "8px", justifyContent: "center", marginTop: "10px" },
 
   overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
   modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "420px", maxWidth: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
