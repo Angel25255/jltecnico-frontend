@@ -205,7 +205,7 @@ export default function AdminUsuarios({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <div style={estilos.encabezado}>
         <h3 style={{ margin: 0 }}>Administración de Usuarios</h3>
         <button style={estilos.botonPrimario} onClick={abrirModal}>+ Nuevo usuario</button>
@@ -460,7 +460,7 @@ export default function AdminUsuarios({ token }) {
 
 const estilos = {
   contenedor: { padding: "1.5rem", maxWidth: "1050px" },
-  encabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
+  encabezado: { display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
   botonPrimario: { background: "#1d4ed8", color: "#fff", border: "none", padding: "10px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: 600 },
   botonSecundario: { background: "transparent", border: "1px solid #cbd5e1", padding: "10px 16px", borderRadius: "8px", cursor: "pointer" },
   textoAyuda: { fontSize: "0.85rem", color: "#475569" },
