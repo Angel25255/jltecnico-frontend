@@ -89,7 +89,7 @@ export default function Auditoria({ token }) {
   const totalPaginas = Math.max(1, Math.ceil(totalRegistros / tamanoPagina));
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <div style={estilos.encabezado}>
         <div>
           <h3 style={{ margin: 0 }}>Auditoría del sistema</h3>
@@ -145,38 +145,40 @@ export default function Auditoria({ token }) {
           <p style={estilos.cargandoTexto}>Cargando registros...</p>
         ) : (
           <>
-            <table style={estilos.tabla}>
-              <thead>
-                <tr>
-                  <th style={estilos.th}>Fecha / Hora</th>
-                  <th style={estilos.th}>Acción</th>
-                  <th style={estilos.th}>Usuario</th>
-                  <th style={estilos.th}>IP</th>
-                  <th style={estilos.th}>Detalle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.length === 0 && (
-                  <tr><td colSpan={5} style={estilos.tdVacio}>No hay registros con esos filtros.</td></tr>
-                )}
-                {logs.map((log) => {
-                  const color = COLOR_ACCION[log.accion] || { bg: "#f1f5f9", texto: "#334155" };
-                  return (
-                    <tr key={log.id} style={estilos.filaTabla}>
-                      <td style={estilos.td}>{new Date(log.fechaHora).toLocaleString("es-PE")}</td>
-                      <td style={estilos.td}>
-                        <span style={{ ...estilos.badge, background: color.bg, color: color.texto }}>
-                          {log.accion}
-                        </span>
-                      </td>
-                      <td style={estilos.td}>{log.nombreUsuario || log.correoIntento || "—"}</td>
-                      <td style={estilos.td}><code style={estilos.codigo}>{log.ip || "—"}</code></td>
-                      <td style={estilos.td}>{log.detalle || "—"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div style={{ overflowX: "auto" }}>
+              <table style={estilos.tabla}>
+                <thead>
+                  <tr>
+                    <th style={estilos.th}>Fecha / Hora</th>
+                    <th style={estilos.th}>Acción</th>
+                    <th style={estilos.th}>Usuario</th>
+                    <th style={estilos.th}>IP</th>
+                    <th style={estilos.th}>Detalle</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.length === 0 && (
+                    <tr><td colSpan={5} style={estilos.tdVacio}>No hay registros con esos filtros.</td></tr>
+                  )}
+                  {logs.map((log) => {
+                    const color = COLOR_ACCION[log.accion] || { bg: "#f1f5f9", texto: "#334155" };
+                    return (
+                      <tr key={log.id} style={estilos.filaTabla}>
+                        <td style={estilos.td}>{new Date(log.fechaHora).toLocaleString("es-PE")}</td>
+                        <td style={estilos.td}>
+                          <span style={{ ...estilos.badge, background: color.bg, color: color.texto }}>
+                            {log.accion}
+                          </span>
+                        </td>
+                        <td style={estilos.td}>{log.nombreUsuario || log.correoIntento || "—"}</td>
+                        <td style={estilos.td}><code style={estilos.codigo}>{log.ip || "—"}</code></td>
+                        <td style={estilos.td}>{log.detalle || "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
             <div style={estilos.paginacion}>
               <button
@@ -206,7 +208,7 @@ export default function Auditoria({ token }) {
 
 const estilos = {
   contenedor: { padding: "1.5rem 2rem", maxWidth: "1150px" },
-  encabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" },
+  encabezado: { display: "flex", flexWrap: "wrap", gap: "14px", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" },
   textoAyuda: { fontSize: "0.85rem", color: "#64748b", marginTop: "4px", maxWidth: "480px" },
   resumenTotal: {
     background: "#0f172a", borderRadius: "10px", padding: "10px 20px",
@@ -225,7 +227,7 @@ const estilos = {
     padding: "8px 10px", borderRadius: "7px", border: "1px solid #cbd5e1", fontSize: "0.85rem",
     minWidth: "140px",
   },
-  botonesFiltro: { display: "flex", gap: "8px" },
+  botonesFiltro: { display: "flex", gap: "8px", flexWrap: "wrap" },
   botonPrimario: {
     background: "#1d4ed8", color: "#fff", border: "none", padding: "9px 16px",
     borderRadius: "7px", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600,
@@ -240,7 +242,7 @@ const estilos = {
     overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
   },
   cargandoTexto: { padding: "30px", textAlign: "center", color: "#94a3b8" },
-  tabla: { width: "100%", borderCollapse: "collapse" },
+  tabla: { width: "100%", borderCollapse: "collapse", minWidth: "720px" },
   th: {
     textAlign: "left", padding: "12px 16px", fontSize: "0.75rem", color: "#64748b",
     borderBottom: "1px solid #e2e8f0", background: "#f8fafc",
@@ -252,7 +254,7 @@ const estilos = {
   badge: { fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", display: "inline-block" },
   codigo: { fontFamily: "monospace", fontSize: "0.8rem", color: "#64748b" },
   paginacion: {
-    display: "flex", justifyContent: "space-between", alignItems: "center",
+    display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "center",
     padding: "14px 16px", borderTop: "1px solid #e2e8f0", background: "#f8fafc",
   },
   botonPaginacion: {
