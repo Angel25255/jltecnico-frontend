@@ -543,6 +543,7 @@ const estilos = {
   logoSubtitulo: { color: "#64748b", fontSize: "0.72rem", marginTop: "2px" },
   nav: {
     flex: 1,
+    minHeight: 0,
     padding: "16px 10px",
     display: "flex",
     flexDirection: "column",
