@@ -148,12 +148,12 @@ export default function Cotizaciones({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <h3 style={{ marginTop: 0 }}>Nueva cotización</h3>
 
       {error && <p style={estilos.error}>{error}</p>}
 
-      <div style={estilos.gridPrincipal}>
+      <div style={estilos.gridPrincipal} className="grid-2col-responsive">
         <div style={estilos.columnaVenta}>
 
           <div style={estilos.tarjeta}>
@@ -244,61 +244,111 @@ export default function Cotizaciones({ token }) {
         {cargandoHistorial ? (
           <p>Cargando...</p>
         ) : (
-          <table style={estilos.tabla}>
-            <thead>
-              <tr>
-                <th style={estilos.th}>#</th>
-                <th style={estilos.th}>Fecha</th>
-                <th style={estilos.th}>Cliente</th>
-                <th style={estilos.th}>Válida hasta</th>
-                <th style={estilos.th}>Total</th>
-                <th style={estilos.th}>Estado</th>
-                <th style={estilos.th}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+            <div className="vista-tarjetas-movil">
               {cotizaciones.length === 0 && (
-                <tr><td colSpan={7} style={estilos.tdVacio}>Aún no hay cotizaciones registradas.</td></tr>
+                <p style={estilos.tdVacioMovil}>Aún no hay cotizaciones registradas.</p>
               )}
               {cotizaciones.map((c) => {
                 const color = COLOR_ESTADO[c.estado] || { bg: "#f1f5f9", texto: "#334155" };
                 return (
-                  <tr key={c.id}>
-                    <td style={estilos.td}>{c.id}</td>
-                    <td style={estilos.td}>{new Date(c.fechaCotizacion).toLocaleDateString("es-PE")}</td>
-                    <td style={estilos.td}>{c.nombreCliente}</td>
-                    <td style={estilos.td}>{new Date(c.fechaValidez).toLocaleDateString("es-PE")}</td>
-                    <td style={estilos.td}>S/ {c.total.toFixed(2)}</td>
-                    <td style={estilos.td}>
+                  <div key={c.id} style={estilos.tarjetaCot}>
+                    <div style={estilos.tarjetaEncabezado}>
+                      <div>
+                        <strong style={estilos.tarjetaNombre}>Cotización #{c.id}</strong>
+                        <div style={estilos.tarjetaSub}>{c.nombreCliente}</div>
+                      </div>
                       <span style={{ ...estilos.badgeEstado, background: color.bg, color: color.texto }}>
                         {c.estado}
                       </span>
-                    </td>
-                    <td style={estilos.td}>
-                      <div style={estilos.accionesFila}>
-                        <button onClick={() => manejarDescargarPdf(c.id)} style={estilos.botonAccionChico}>PDF</button>
-                        {c.estado === "Pendiente" && (
-                          <>
-                            <button onClick={() => manejarCambiarEstado(c, "Aprobada")} style={estilos.botonAprobar}>Aprobar</button>
-                            <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnular}>Anular</button>
-                          </>
-                        )}
-                        {c.estado === "Aprobada" && (
-                          <>
-                            <button onClick={() => manejarConvertirAVenta(c)} style={estilos.botonConvertir}>Convertir en venta</button>
-                            <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnular}>Anular</button>
-                          </>
-                        )}
-                        {c.estado === "Facturada" && c.ventaId && (
-                          <span style={estilos.textoSecundario}>→ Venta #{c.ventaId}</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                    </div>
+                    <div style={estilos.tarjetaFila}><span>Fecha</span><span>{new Date(c.fechaCotizacion).toLocaleDateString("es-PE")}</span></div>
+                    <div style={estilos.tarjetaFila}><span>Válida hasta</span><span>{new Date(c.fechaValidez).toLocaleDateString("es-PE")}</span></div>
+                    <div style={estilos.tarjetaFilaTotal}><span>Total</span><strong>S/ {c.total.toFixed(2)}</strong></div>
+
+                    <div style={estilos.accionesFilaMovil}>
+                      <button onClick={() => manejarDescargarPdf(c.id)} style={estilos.botonAccionMovil}>PDF</button>
+                      {c.estado === "Pendiente" && (
+                        <>
+                          <button onClick={() => manejarCambiarEstado(c, "Aprobada")} style={estilos.botonAprobarMovil}>Aprobar</button>
+                          <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnularMovil}>Anular</button>
+                        </>
+                      )}
+                      {c.estado === "Aprobada" && (
+                        <>
+                          <button onClick={() => manejarConvertirAVenta(c)} style={estilos.botonConvertirMovil}>Convertir en venta</button>
+                          <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnularMovil}>Anular</button>
+                        </>
+                      )}
+                      {c.estado === "Facturada" && c.ventaId && (
+                        <span style={estilos.textoSecundario}>→ Venta #{c.ventaId}</span>
+                      )}
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+            <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+              <table style={estilos.tabla}>
+                <thead>
+                  <tr>
+                    <th style={estilos.th}>#</th>
+                    <th style={estilos.th}>Fecha</th>
+                    <th style={estilos.th}>Cliente</th>
+                    <th style={estilos.th}>Válida hasta</th>
+                    <th style={estilos.th}>Total</th>
+                    <th style={estilos.th}>Estado</th>
+                    <th style={estilos.th}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cotizaciones.length === 0 && (
+                    <tr><td colSpan={7} style={estilos.tdVacio}>Aún no hay cotizaciones registradas.</td></tr>
+                  )}
+                  {cotizaciones.map((c) => {
+                    const color = COLOR_ESTADO[c.estado] || { bg: "#f1f5f9", texto: "#334155" };
+                    return (
+                      <tr key={c.id}>
+                        <td style={estilos.td}>{c.id}</td>
+                        <td style={estilos.td}>{new Date(c.fechaCotizacion).toLocaleDateString("es-PE")}</td>
+                        <td style={estilos.td}>{c.nombreCliente}</td>
+                        <td style={estilos.td}>{new Date(c.fechaValidez).toLocaleDateString("es-PE")}</td>
+                        <td style={estilos.td}>S/ {c.total.toFixed(2)}</td>
+                        <td style={estilos.td}>
+                          <span style={{ ...estilos.badgeEstado, background: color.bg, color: color.texto }}>
+                            {c.estado}
+                          </span>
+                        </td>
+                        <td style={estilos.td}>
+                          <div style={estilos.accionesFila}>
+                            <button onClick={() => manejarDescargarPdf(c.id)} style={estilos.botonAccionChico}>PDF</button>
+                            {c.estado === "Pendiente" && (
+                              <>
+                                <button onClick={() => manejarCambiarEstado(c, "Aprobada")} style={estilos.botonAprobar}>Aprobar</button>
+                                <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnular}>Anular</button>
+                              </>
+                            )}
+                            {c.estado === "Aprobada" && (
+                              <>
+                                <button onClick={() => manejarConvertirAVenta(c)} style={estilos.botonConvertir}>Convertir en venta</button>
+                                <button onClick={() => manejarCambiarEstado(c, "Anulada")} style={estilos.botonAnular}>Anular</button>
+                              </>
+                            )}
+                            {c.estado === "Facturada" && c.ventaId && (
+                              <span style={estilos.textoSecundario}>→ Venta #{c.ventaId}</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -381,6 +431,22 @@ export default function Cotizaciones({ token }) {
           mensajeVacio="No hay productos registrados todavía."
         />
       )}
+
+      <style>{`
+        @media (max-width: 900px) {
+          .grid-2col-responsive {
+            display: block !important;
+          }
+          .grid-2col-responsive > * {
+            margin-bottom: 16px;
+          }
+        }
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -668,7 +734,23 @@ const estilos = {
   botonRegistrar: { width: "100%", background: "#f59e0b", color: "#0f172a", border: "none", padding: "14px", borderRadius: "10px", cursor: "pointer", fontWeight: 700, fontSize: "0.95rem" },
 
   historial: { marginTop: "30px" },
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+
+  // ---- Tarjetas del historial (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaCot: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.92rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.78rem", color: "#64748b", marginTop: "2px" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+  tarjetaFilaTotal: { display: "flex", justifyContent: "space-between", fontSize: "0.9rem", color: "#1e293b", padding: "8px 0 4px 0" },
+  accionesFilaMovil: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", marginTop: "10px" },
+  botonAccionMovil: { background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", flex: 1 },
+  botonAprobarMovil: { background: "#dbeafe", color: "#1d4ed8", border: "none", padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", flex: 1 },
+  botonAnularMovil: { background: "#fee2e2", color: "#b91c1c", border: "none", padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", flex: 1 },
+  botonConvertirMovil: { background: "#166534", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, flex: 1, minWidth: "140px" },
+
+  // ---- Tabla del historial (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "820px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.78rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
@@ -680,8 +762,8 @@ const estilos = {
   botonConvertir: { background: "#166534", color: "#fff", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600 },
 
   // Modal confirmación
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
-  modalConfirmacion: { background: "#fff", borderRadius: "16px", padding: "28px", width: "440px", maxWidth: "92vw", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" },
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
+  modalConfirmacion: { background: "#fff", borderRadius: "16px", padding: "28px", width: "440px", maxWidth: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" },
   encabezadoConfirmacion: { textAlign: "center", marginBottom: "20px" },
   iconoConfirmacionGrande: { width: "60px", height: "60px", lineHeight: "60px", borderRadius: "50%", background: "#dbeafe", fontSize: "1.8rem", margin: "0 auto 12px auto" },
   tituloConfirmacionGrande: { margin: 0, fontSize: "1.25rem", color: "#1e293b" },
