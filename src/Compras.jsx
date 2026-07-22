@@ -104,7 +104,7 @@ export default function Compras({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <h3 style={{ marginTop: 0 }}>Nueva compra (entrada de stock)</h3>
       <p style={estilos.textoAyuda}>
         Registra la mercadería que te llega de un proveedor. El stock del producto sube automáticamente
@@ -113,7 +113,7 @@ export default function Compras({ token }) {
 
       {error && <p style={estilos.error}>{error}</p>}
 
-      <div style={estilos.gridPrincipal}>
+      <div style={estilos.gridPrincipal} className="grid-2col-responsive">
         <div style={estilos.columnaVenta}>
 
           <div style={estilos.tarjeta}>
@@ -212,33 +212,59 @@ export default function Compras({ token }) {
         {cargandoHistorial ? (
           <p>Cargando...</p>
         ) : (
-          <table style={estilos.tabla}>
-            <thead>
-              <tr>
-                <th style={estilos.th}>#</th>
-                <th style={estilos.th}>Fecha</th>
-                <th style={estilos.th}>Proveedor</th>
-                <th style={estilos.th}>Registrado por</th>
-                <th style={estilos.th}>Documento</th>
-                <th style={estilos.th}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+            <div className="vista-tarjetas-movil">
               {compras.length === 0 && (
-                <tr><td colSpan={6} style={estilos.tdVacio}>Aún no hay compras registradas.</td></tr>
+                <p style={estilos.tdVacioMovil}>Aún no hay compras registradas.</p>
               )}
               {compras.map((c) => (
-                <tr key={c.id}>
-                  <td style={estilos.td}>{c.id}</td>
-                  <td style={estilos.td}>{new Date(c.fechaCompra).toLocaleString("es-PE")}</td>
-                  <td style={estilos.td}>{c.nombreProveedor}</td>
-                  <td style={estilos.td}>{c.nombreUsuario}</td>
-                  <td style={estilos.td}>{c.numeroDocumento || "—"}</td>
-                  <td style={estilos.td}>S/ {c.total.toFixed(2)}</td>
-                </tr>
+                <div key={c.id} style={estilos.tarjetaCompra}>
+                  <div style={estilos.tarjetaEncabezado}>
+                    <div>
+                      <strong style={estilos.tarjetaNombre}>Compra #{c.id}</strong>
+                      <div style={estilos.tarjetaSub}>{c.nombreProveedor}</div>
+                    </div>
+                    <span style={estilos.montoTarjeta}>S/ {c.total.toFixed(2)}</span>
+                  </div>
+                  <div style={estilos.tarjetaFila}><span>Fecha</span><span>{new Date(c.fechaCompra).toLocaleString("es-PE")}</span></div>
+                  <div style={estilos.tarjetaFila}><span>Registrado por</span><span>{c.nombreUsuario}</span></div>
+                  <div style={estilos.tarjetaFila}><span>Documento</span><span>{c.numeroDocumento || "—"}</span></div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+            <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+              <table style={estilos.tabla}>
+                <thead>
+                  <tr>
+                    <th style={estilos.th}>#</th>
+                    <th style={estilos.th}>Fecha</th>
+                    <th style={estilos.th}>Proveedor</th>
+                    <th style={estilos.th}>Registrado por</th>
+                    <th style={estilos.th}>Documento</th>
+                    <th style={estilos.th}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compras.length === 0 && (
+                    <tr><td colSpan={6} style={estilos.tdVacio}>Aún no hay compras registradas.</td></tr>
+                  )}
+                  {compras.map((c) => (
+                    <tr key={c.id}>
+                      <td style={estilos.td}>{c.id}</td>
+                      <td style={estilos.td}>{new Date(c.fechaCompra).toLocaleString("es-PE")}</td>
+                      <td style={estilos.td}>{c.nombreProveedor}</td>
+                      <td style={estilos.td}>{c.nombreUsuario}</td>
+                      <td style={estilos.td}>{c.numeroDocumento || "—"}</td>
+                      <td style={estilos.td}>S/ {c.total.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -294,6 +320,22 @@ export default function Compras({ token }) {
           mensajeVacio="No hay productos registrados todavía."
         />
       )}
+
+      <style>{`
+        @media (max-width: 900px) {
+          .grid-2col-responsive {
+            display: block !important;
+          }
+          .grid-2col-responsive > * {
+            margin-bottom: 16px;
+          }
+        }
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -453,7 +495,7 @@ const estilos = {
 
   // ---- Modal de confirmación de compra (grande, con detalle) ----
   modalConfirmacion: {
-    background: "#fff", borderRadius: "16px", padding: "28px", width: "440px", maxWidth: "92vw",
+    background: "#fff", borderRadius: "16px", padding: "28px", width: "440px", maxWidth: "100%",
     maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
   },
   encabezadoConfirmacion: { textAlign: "center", marginBottom: "20px" },
@@ -485,12 +527,23 @@ const estilos = {
   },
 
   historial: { marginTop: "30px" },
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+
+  // ---- Tarjetas del historial (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaCompra: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.92rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.78rem", color: "#64748b", marginTop: "2px" },
+  montoTarjeta: { fontSize: "0.95rem", fontWeight: 700, color: "#0f172a" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+
+  // ---- Tabla del historial (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "700px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.78rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
 
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
   modalTabla: { background: "#fff", borderRadius: "12px", padding: "24px", width: "680px", maxWidth: "94vw", maxHeight: "82vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
   modalEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
   botonCerrarModal: { background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#64748b" },
