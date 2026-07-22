@@ -49,7 +49,7 @@ export default function Kardex({ token }) {
   const gananciaGeneral = filtrados.reduce((acc, r) => acc + r.gananciaTotal, 0);
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <h3 style={{ marginTop: 0 }}>Kardex — Inventario por producto</h3>
       <p style={estilos.textoAyuda}>
         Totales acumulados de siempre (no depende de un rango de fechas). Para reportes por periodo,
@@ -85,63 +85,120 @@ export default function Kardex({ token }) {
       {cargando ? (
         <p>Cargando...</p>
       ) : (
-        <table style={estilos.tabla}>
-          <thead>
-            <tr>
-              <th style={estilos.th}>Producto</th>
-              <th style={estilos.th}>Stock</th>
-              <th style={estilos.th}>Precio compra</th>
-              <th style={estilos.th}>Precio venta</th>
-              <th style={estilos.th}>Margen/unidad</th>
-              <th style={estilos.th}>Cant. comprada</th>
-              <th style={estilos.th}>Total comprado</th>
-              <th style={estilos.th}>Cant. vendida</th>
-              <th style={estilos.th}>Total vendido</th>
-              <th style={estilos.th}>Ganancia</th>
-              <th style={estilos.th}></th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+          <div className="vista-tarjetas-movil">
             {filtrados.length === 0 && (
-              <tr><td colSpan={11} style={estilos.tdVacio}>No hay productos que coincidan.</td></tr>
+              <p style={estilos.tdVacioMovil}>No hay productos que coincidan.</p>
             )}
             {filtrados.map((r) => (
-              <tr key={r.productoId}>
-                <td style={estilos.td}>
-                  <div style={estilos.nombreProducto}>{r.nombre}</div>
-                  <div style={estilos.subtextoCodigo}>{r.codigo || "—"} · {r.nombreCategoria || "Sin categoría"}</div>
-                </td>
-                <td style={estilos.td}>
-                  <span style={r.stockActual <= 5 ? estilos.stockBajo : undefined}>{r.stockActual}</span>
-                </td>
-                <td style={estilos.td}>S/ {r.costoUnitarioActual.toFixed(2)}</td>
-                <td style={estilos.td}>S/ {r.precioVentaActual.toFixed(2)}</td>
-                <td style={estilos.td}>
-                  {r.costoUnitarioActual > 0 ? (
+              <div key={r.productoId} style={estilos.tarjetaProd}>
+                <div style={estilos.tarjetaEncabezado}>
+                  <div>
+                    <strong style={estilos.tarjetaNombre}>{r.nombre}</strong>
+                    <div style={estilos.tarjetaSub}>{r.codigo || "—"} · {r.nombreCategoria || "Sin categoría"}</div>
+                  </div>
+                  <span style={r.stockActual <= 5 ? estilos.stockBajoBadge : estilos.stockOkBadge}>
+                    Stock: {r.stockActual}
+                  </span>
+                </div>
+
+                <div style={estilos.tarjetaGridPrecios}>
+                  <div style={estilos.tarjetaPrecioBox}>
+                    <span style={estilos.tarjetaPrecioLabel}>Compra</span>
+                    <span style={estilos.tarjetaPrecioValor}>S/ {r.costoUnitarioActual.toFixed(2)}</span>
+                  </div>
+                  <div style={estilos.tarjetaPrecioBox}>
+                    <span style={estilos.tarjetaPrecioLabel}>Venta</span>
+                    <span style={estilos.tarjetaPrecioValor}>S/ {r.precioVentaActual.toFixed(2)}</span>
+                  </div>
+                  <div style={estilos.tarjetaPrecioBox}>
+                    <span style={estilos.tarjetaPrecioLabel}>Margen</span>
                     <span style={estilos.margenUnidad}>
-                      S/ {(r.precioVentaActual - r.costoUnitarioActual).toFixed(2)}
-                      {" "}({(((r.precioVentaActual - r.costoUnitarioActual) / r.precioVentaActual) * 100).toFixed(0)}%)
+                      {r.costoUnitarioActual > 0
+                        ? `${(((r.precioVentaActual - r.costoUnitarioActual) / r.precioVentaActual) * 100).toFixed(0)}%`
+                        : "—"}
                     </span>
-                  ) : "—"}
-                </td>
-                <td style={estilos.td}>{r.cantidadComprada}</td>
-                <td style={estilos.td}>S/ {r.totalComprado.toFixed(2)}</td>
-                <td style={estilos.td}>{r.cantidadVendida}</td>
-                <td style={estilos.td}>S/ {r.totalVendido.toFixed(2)}</td>
-                <td style={estilos.td}>
+                  </div>
+                </div>
+
+                <div style={estilos.tarjetaFila}><span>Comprado</span><span>{r.cantidadComprada} un. · S/ {r.totalComprado.toFixed(2)}</span></div>
+                <div style={estilos.tarjetaFila}><span>Vendido</span><span>{r.cantidadVendida} un. · S/ {r.totalVendido.toFixed(2)}</span></div>
+                <div style={estilos.tarjetaFilaGanancia}>
+                  <span>Ganancia</span>
                   <span style={r.gananciaTotal >= 0 ? estilos.gananciaPositiva : estilos.gananciaNegativa}>
                     S/ {r.gananciaTotal.toFixed(2)}
                   </span>
-                </td>
-                <td style={estilos.td}>
-                  <button onClick={() => abrirDetalle(r)} style={estilos.botonVerMovimientos}>
-                    Ver movimientos
-                  </button>
-                </td>
-              </tr>
+                </div>
+
+                <button onClick={() => abrirDetalle(r)} style={estilos.botonVerMovimientosMovil}>
+                  Ver movimientos
+                </button>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+
+          {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+          <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+            <table style={estilos.tabla}>
+              <thead>
+                <tr>
+                  <th style={estilos.th}>Producto</th>
+                  <th style={estilos.th}>Stock</th>
+                  <th style={estilos.th}>Precio compra</th>
+                  <th style={estilos.th}>Precio venta</th>
+                  <th style={estilos.th}>Margen/unidad</th>
+                  <th style={estilos.th}>Cant. comprada</th>
+                  <th style={estilos.th}>Total comprado</th>
+                  <th style={estilos.th}>Cant. vendida</th>
+                  <th style={estilos.th}>Total vendido</th>
+                  <th style={estilos.th}>Ganancia</th>
+                  <th style={estilos.th}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtrados.length === 0 && (
+                  <tr><td colSpan={11} style={estilos.tdVacio}>No hay productos que coincidan.</td></tr>
+                )}
+                {filtrados.map((r) => (
+                  <tr key={r.productoId}>
+                    <td style={estilos.td}>
+                      <div style={estilos.nombreProducto}>{r.nombre}</div>
+                      <div style={estilos.subtextoCodigo}>{r.codigo || "—"} · {r.nombreCategoria || "Sin categoría"}</div>
+                    </td>
+                    <td style={estilos.td}>
+                      <span style={r.stockActual <= 5 ? estilos.stockBajo : undefined}>{r.stockActual}</span>
+                    </td>
+                    <td style={estilos.td}>S/ {r.costoUnitarioActual.toFixed(2)}</td>
+                    <td style={estilos.td}>S/ {r.precioVentaActual.toFixed(2)}</td>
+                    <td style={estilos.td}>
+                      {r.costoUnitarioActual > 0 ? (
+                        <span style={estilos.margenUnidad}>
+                          S/ {(r.precioVentaActual - r.costoUnitarioActual).toFixed(2)}
+                          {" "}({(((r.precioVentaActual - r.costoUnitarioActual) / r.precioVentaActual) * 100).toFixed(0)}%)
+                        </span>
+                      ) : "—"}
+                    </td>
+                    <td style={estilos.td}>{r.cantidadComprada}</td>
+                    <td style={estilos.td}>S/ {r.totalComprado.toFixed(2)}</td>
+                    <td style={estilos.td}>{r.cantidadVendida}</td>
+                    <td style={estilos.td}>S/ {r.totalVendido.toFixed(2)}</td>
+                    <td style={estilos.td}>
+                      <span style={r.gananciaTotal >= 0 ? estilos.gananciaPositiva : estilos.gananciaNegativa}>
+                        S/ {r.gananciaTotal.toFixed(2)}
+                      </span>
+                    </td>
+                    <td style={estilos.td}>
+                      <button onClick={() => abrirDetalle(r)} style={estilos.botonVerMovimientos}>
+                        Ver movimientos
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Modal: kardex detallado de un producto */}
@@ -163,42 +220,72 @@ export default function Kardex({ token }) {
                 {movimientos.length === 0 ? (
                   <p style={estilos.textoSecundario}>Este producto todavía no tiene movimientos registrados.</p>
                 ) : (
-                  <table style={estilos.tablaModal}>
-                    <thead>
-                      <tr>
-                        <th style={estilos.thModal}>Fecha</th>
-                        <th style={estilos.thModal}>Tipo</th>
-                        <th style={estilos.thModal}>Cantidad</th>
-                        <th style={estilos.thModal}>Referencia</th>
-                        <th style={estilos.thModal}>Tercero</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <>
+                    {/* Tarjetas de movimientos - celular */}
+                    <div className="vista-tarjetas-movimientos-movil">
                       {movimientos.map((m, i) => (
-                        <tr key={i}>
-                          <td style={estilos.tdModal}>{new Date(m.fecha).toLocaleString("es-PE")}</td>
-                          <td style={estilos.tdModal}>
-                            <span style={m.cantidad > 0 ? estilos.badgeEntrada : estilos.badgeSalida}>
-                              {m.tipo}
-                            </span>
-                          </td>
-                          <td style={estilos.tdModal}>
+                        <div key={i} style={estilos.tarjetaMovimiento}>
+                          <div style={estilos.tarjetaMovEncabezado}>
+                            <span style={m.cantidad > 0 ? estilos.badgeEntrada : estilos.badgeSalida}>{m.tipo}</span>
                             <span style={m.cantidad > 0 ? estilos.cantidadPositiva : estilos.cantidadNegativa}>
                               {m.cantidad > 0 ? `+${m.cantidad}` : m.cantidad}
                             </span>
-                          </td>
-                          <td style={estilos.tdModal}>{m.referencia}</td>
-                          <td style={estilos.tdModal}>{m.nombreTercero || "—"}</td>
-                        </tr>
+                          </div>
+                          <div style={estilos.tarjetaMovFila}>{new Date(m.fecha).toLocaleString("es-PE")}</div>
+                          <div style={estilos.tarjetaMovFila}>{m.referencia} {m.nombreTercero ? `· ${m.nombreTercero}` : ""}</div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+
+                    {/* Tabla de movimientos - escritorio */}
+                    <table style={estilos.tablaModal} className="vista-tabla-movimientos-escritorio">
+                      <thead>
+                        <tr>
+                          <th style={estilos.thModal}>Fecha</th>
+                          <th style={estilos.thModal}>Tipo</th>
+                          <th style={estilos.thModal}>Cantidad</th>
+                          <th style={estilos.thModal}>Referencia</th>
+                          <th style={estilos.thModal}>Tercero</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {movimientos.map((m, i) => (
+                          <tr key={i}>
+                            <td style={estilos.tdModal}>{new Date(m.fecha).toLocaleString("es-PE")}</td>
+                            <td style={estilos.tdModal}>
+                              <span style={m.cantidad > 0 ? estilos.badgeEntrada : estilos.badgeSalida}>
+                                {m.tipo}
+                              </span>
+                            </td>
+                            <td style={estilos.tdModal}>
+                              <span style={m.cantidad > 0 ? estilos.cantidadPositiva : estilos.cantidadNegativa}>
+                                {m.cantidad > 0 ? `+${m.cantidad}` : m.cantidad}
+                              </span>
+                            </td>
+                            <td style={estilos.tdModal}>{m.referencia}</td>
+                            <td style={estilos.tdModal}>{m.nombreTercero || "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
                 )}
               </div>
             )}
           </div>
         </div>
       )}
+
+      <style>{`
+        .vista-tarjetas-movil { display: none; }
+        .vista-tarjetas-movimientos-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+          .vista-tarjetas-movimientos-movil { display: flex; flex-direction: column; gap: 8px; }
+          .vista-tabla-movimientos-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -212,7 +299,25 @@ const estilos = {
   valorTotal: { fontSize: "1.4rem", fontWeight: 800 },
   inputBusqueda: { width: "100%", maxWidth: "400px", padding: "9px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.88rem", marginBottom: "16px" },
   error: { color: "#dc2626", fontSize: "0.85rem" },
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+
+  // ---- Tarjetas de producto (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaProd: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.92rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.75rem", color: "#64748b", marginTop: "2px" },
+  stockOkBadge: { background: "#f1f5f9", color: "#475569", fontSize: "0.72rem", padding: "3px 9px", borderRadius: "999px", whiteSpace: "nowrap" },
+  stockBajoBadge: { background: "#fee2e2", color: "#b91c1c", fontSize: "0.72rem", padding: "3px 9px", borderRadius: "999px", fontWeight: 700, whiteSpace: "nowrap" },
+  tarjetaGridPrecios: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "10px" },
+  tarjetaPrecioBox: { background: "#f8fafc", borderRadius: "8px", padding: "8px", display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" },
+  tarjetaPrecioLabel: { fontSize: "0.68rem", color: "#94a3b8", textTransform: "uppercase" },
+  tarjetaPrecioValor: { fontSize: "0.85rem", fontWeight: 700, color: "#1e293b" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#475569", padding: "5px 0", borderTop: "1px solid #f8fafc" },
+  tarjetaFilaGanancia: { display: "flex", justifyContent: "space-between", fontSize: "0.9rem", color: "#1e293b", padding: "8px 0 10px 0", borderTop: "1px solid #f8fafc" },
+  botonVerMovimientosMovil: { width: "100%", background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "10px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 },
+
+  // ---- Tabla de productos (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "1100px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.75rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
@@ -224,13 +329,20 @@ const estilos = {
   margenUnidad: { color: "#0891b2", fontWeight: 600, fontSize: "0.8rem" },
   botonVerMovimientos: { background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", whiteSpace: "nowrap" },
 
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
   modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "700px", maxWidth: "94vw", maxHeight: "82vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
   modalEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" },
   subtextoModal: { fontSize: "0.8rem", color: "#64748b", margin: "4px 0 0 0" },
   botonCerrarModal: { background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#64748b" },
   textoSecundario: { color: "#64748b", fontSize: "0.85rem" },
   contenedorTablaModal: { overflowY: "auto", flex: 1 },
+
+  // ---- Tarjetas de movimientos (celular, dentro del modal) ----
+  tarjetaMovimiento: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "10px" },
+  tarjetaMovEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" },
+  tarjetaMovFila: { fontSize: "0.78rem", color: "#475569", padding: "2px 0" },
+
+  // ---- Tabla de movimientos (escritorio, dentro del modal) ----
   tablaModal: { width: "100%", borderCollapse: "collapse" },
   thModal: { textAlign: "left", padding: "8px 10px", fontSize: "0.75rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc", position: "sticky", top: 0 },
   tdModal: { padding: "8px 10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
