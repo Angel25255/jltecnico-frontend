@@ -203,12 +203,12 @@ export default function Ventas({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <h3 style={{ marginTop: 0 }}>Nueva venta</h3>
 
       {error && <p style={estilos.error}>{error}</p>}
 
-      <div style={estilos.gridPrincipal}>
+      <div style={estilos.gridPrincipal} className="grid-2col-responsive">
         <div style={estilos.columnaVenta}>
 
           {/* Cliente */}
@@ -331,45 +331,80 @@ export default function Ventas({ token }) {
         {cargandoHistorial ? (
           <p>Cargando...</p>
         ) : (
-          <table style={estilos.tabla}>
-            <thead>
-              <tr>
-                <th style={estilos.th}>#</th>
-                <th style={estilos.th}>Fecha</th>
-                <th style={estilos.th}>Cliente</th>
-                <th style={estilos.th}>Vendedor</th>
-                <th style={estilos.th}>Total</th>
-                <th style={estilos.th}>Estado</th>
-                <th style={estilos.th}>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+            <div className="vista-tarjetas-movil">
               {ventas.length === 0 && (
-                <tr><td colSpan={7} style={estilos.tdVacio}>Aún no hay ventas registradas.</td></tr>
+                <p style={estilos.tdVacioMovil}>Aún no hay ventas registradas.</p>
               )}
               {ventas.map((v) => (
-                <tr key={v.id}>
-                  <td style={estilos.td}>{v.id}</td>
-                  <td style={estilos.td}>{new Date(v.fechaVenta).toLocaleString("es-PE")}</td>
-                  <td style={estilos.td}>{v.nombreCliente}</td>
-                  <td style={estilos.td}>{v.nombreVendedor}</td>
-                  <td style={estilos.td}>S/ {v.total.toFixed(2)}</td>
-                  <td style={estilos.td}>
+                <div key={v.id} style={estilos.tarjetaVenta}>
+                  <div style={estilos.tarjetaEncabezado}>
+                    <div>
+                      <strong style={estilos.tarjetaNombre}>Venta #{v.id}</strong>
+                      <div style={estilos.tarjetaSub}>{v.nombreCliente}</div>
+                    </div>
                     <span style={v.estado === "Anulada" ? estilos.badgeAnulada : estilos.badgeCompletada}>
                       {v.estado}
                     </span>
-                  </td>
-                  <td style={estilos.td}>
-                    <button onClick={() => manejarImprimir(v)} style={estilos.botonPdf}>Imprimir</button>
-                    <button onClick={() => manejarDescargarPdf(v.id)} style={estilos.botonPdf}>PDF</button>
+                  </div>
+                  <div style={estilos.tarjetaFila}><span>Fecha</span><span>{new Date(v.fechaVenta).toLocaleString("es-PE")}</span></div>
+                  <div style={estilos.tarjetaFila}><span>Vendedor</span><span>{v.nombreVendedor}</span></div>
+                  <div style={estilos.tarjetaFilaTotal}><span>Total</span><strong>S/ {v.total.toFixed(2)}</strong></div>
+                  <div style={estilos.tarjetaBotones}>
+                    <button onClick={() => manejarImprimir(v)} style={estilos.botonPdfMovil}>🖨️ Imprimir</button>
+                    <button onClick={() => manejarDescargarPdf(v.id)} style={estilos.botonPdfMovil}>⬇️ PDF</button>
                     {v.estado !== "Anulada" && (
-                      <button onClick={() => manejarAnular(v)} style={estilos.botonAnular}>Anular</button>
+                      <button onClick={() => manejarAnular(v)} style={estilos.botonAnularMovil}>Anular</button>
                     )}
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+            <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+              <table style={estilos.tabla}>
+                <thead>
+                  <tr>
+                    <th style={estilos.th}>#</th>
+                    <th style={estilos.th}>Fecha</th>
+                    <th style={estilos.th}>Cliente</th>
+                    <th style={estilos.th}>Vendedor</th>
+                    <th style={estilos.th}>Total</th>
+                    <th style={estilos.th}>Estado</th>
+                    <th style={estilos.th}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ventas.length === 0 && (
+                    <tr><td colSpan={7} style={estilos.tdVacio}>Aún no hay ventas registradas.</td></tr>
+                  )}
+                  {ventas.map((v) => (
+                    <tr key={v.id}>
+                      <td style={estilos.td}>{v.id}</td>
+                      <td style={estilos.td}>{new Date(v.fechaVenta).toLocaleString("es-PE")}</td>
+                      <td style={estilos.td}>{v.nombreCliente}</td>
+                      <td style={estilos.td}>{v.nombreVendedor}</td>
+                      <td style={estilos.td}>S/ {v.total.toFixed(2)}</td>
+                      <td style={estilos.td}>
+                        <span style={v.estado === "Anulada" ? estilos.badgeAnulada : estilos.badgeCompletada}>
+                          {v.estado}
+                        </span>
+                      </td>
+                      <td style={estilos.td}>
+                        <button onClick={() => manejarImprimir(v)} style={estilos.botonPdf}>Imprimir</button>
+                        <button onClick={() => manejarDescargarPdf(v.id)} style={estilos.botonPdf}>PDF</button>
+                        {v.estado !== "Anulada" && (
+                          <button onClick={() => manejarAnular(v)} style={estilos.botonAnular}>Anular</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -423,6 +458,22 @@ export default function Ventas({ token }) {
           mensajeVacio="No hay productos registrados todavía."
         />
       )}
+
+      <style>{`
+        @media (max-width: 900px) {
+          .grid-2col-responsive {
+            display: block !important;
+          }
+          .grid-2col-responsive > * {
+            margin-bottom: 16px;
+          }
+        }
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -827,7 +878,21 @@ const estilos = {
   },
 
   historial: { marginTop: "30px" },
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+
+  // ---- Tarjetas del historial (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaVenta: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px", marginBottom: "0" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.92rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.78rem", color: "#64748b", marginTop: "2px" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+  tarjetaFilaTotal: { display: "flex", justifyContent: "space-between", fontSize: "0.9rem", color: "#1e293b", padding: "8px 0 4px 0" },
+  tarjetaBotones: { display: "flex", gap: "6px", marginTop: "10px", flexWrap: "wrap" },
+  botonPdfMovil: { flex: 1, background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "8px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, minWidth: "80px" },
+  botonAnularMovil: { flex: 1, background: "#fee2e2", color: "#b91c1c", border: "none", padding: "8px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, minWidth: "80px" },
+
+  // ---- Tabla del historial (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "800px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.78rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
@@ -836,7 +901,7 @@ const estilos = {
   botonAnular: { background: "#fee2e2", color: "#b91c1c", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem" },
   botonPdf: { background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", marginRight: "6px" },
 
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
   modalTabla: { background: "#fff", borderRadius: "12px", padding: "24px", width: "720px", maxWidth: "94vw", maxHeight: "82vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
   modalEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
   botonCerrarModal: { background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#64748b" },
@@ -864,4 +929,4 @@ const estilos = {
     width: "100%", marginTop: "10px", background: "#166534", color: "#fff", border: "none",
     padding: "10px", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem",
   },
-};
+}; 
