@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  listarClientes, crearCliente, editarCliente, cambiarEstadoCliente, consultarDocumento,
+  listarClientes, crearCliente, editarCliente, cambiarEstadoCliente, consultarDocumento, validarTelefono,
 } from "./authApi";
 
 export default function Clientes({ token }) {
@@ -20,6 +20,8 @@ export default function Clientes({ token }) {
   const [buscandoDocumento, setBuscandoDocumento] = useState(false);
   const [mensajeBusqueda, setMensajeBusqueda] = useState("");
   const [guardando, setGuardando] = useState(false);
+  const [validandoTelefono, setValidandoTelefono] = useState(false);
+  const [resultadoTelefono, setResultadoTelefono] = useState(null);
 
   async function cargar() {
     setCargando(true);
@@ -49,6 +51,7 @@ export default function Clientes({ token }) {
     setCorreo("");
     setDireccion("");
     setMensajeBusqueda("");
+    setResultadoTelefono(null);
     setError("");
     setMostrarModal(true);
   }
@@ -62,8 +65,22 @@ export default function Clientes({ token }) {
     setCorreo(cliente.correo || "");
     setDireccion(cliente.direccion || "");
     setMensajeBusqueda("");
+    setResultadoTelefono(null);
     setError("");
     setMostrarModal(true);
+  }
+
+  async function manejarValidarTelefono() {
+    setValidandoTelefono(true);
+    setResultadoTelefono(null);
+    try {
+      const resultado = await validarTelefono(token, telefono);
+      setResultadoTelefono(resultado);
+    } catch (err) {
+      setResultadoTelefono({ valido: false, mensaje: err.message });
+    } finally {
+      setValidandoTelefono(false);
+    }
   }
 
   async function manejarBuscarDocumento() {
@@ -276,7 +293,29 @@ export default function Clientes({ token }) {
               />
 
               <label style={estilos.label}>Teléfono</label>
-              <input value={telefono} onChange={(e) => setTelefono(e.target.value)} style={estilos.input} />
+              <div style={estilos.filaTelefono}>
+                <input
+                  value={telefono}
+                  onChange={(e) => { setTelefono(e.target.value.replace(/\D/g, "")); setResultadoTelefono(null); }}
+                  style={{ ...estilos.input, flex: 1 }}
+                  maxLength={9}
+                  placeholder="Ej. 987654321"
+                />
+                <button
+                  type="button"
+                  onClick={manejarValidarTelefono}
+                  disabled={validandoTelefono || telefono.length < 9}
+                  style={estilos.botonValidarTelefono}
+                >
+                  {validandoTelefono ? "Verificando..." : "Verificar"}
+                </button>
+              </div>
+              {resultadoTelefono && (
+                <p style={resultadoTelefono.valido ? estilos.telefonoValido : estilos.telefonoInvalido}>
+                  {resultadoTelefono.valido ? "✓" : "✕"} {resultadoTelefono.mensaje}
+                  {resultadoTelefono.operador && ` (${resultadoTelefono.operador})`}
+                </p>
+              )}
 
               <label style={estilos.label}>Correo</label>
               <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} style={estilos.input} />
@@ -368,6 +407,13 @@ const estilos = {
     width: "100%", padding: "9px 10px", borderRadius: "6px", border: "1px solid #cbd5e1",
     fontSize: "0.95rem", boxSizing: "border-box",
   },
+  filaTelefono: { display: "flex", gap: "8px" },
+  botonValidarTelefono: {
+    background: "#f59e0b", color: "#0f172a", border: "none", padding: "0 14px",
+    borderRadius: "6px", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem", whiteSpace: "nowrap",
+  },
+  telefonoValido: { fontSize: "0.8rem", color: "#166534", background: "#dcfce7", padding: "7px 10px", borderRadius: "6px", marginTop: "6px" },
+  telefonoInvalido: { fontSize: "0.8rem", color: "#b91c1c", background: "#fee2e2", padding: "7px 10px", borderRadius: "6px", marginTop: "6px" },
   filaBusquedaDocumento: { display: "flex", gap: "8px" },
   botonBuscarDoc: {
     background: "#f59e0b", color: "#0f172a", border: "none", padding: "0 16px",

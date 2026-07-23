@@ -679,3 +679,14 @@ export async function obtenerResumenDashboard(token) {
   if (!res.ok) throw new Error("No se pudo obtener el resumen del dashboard");
   return res.json();
 }
+
+// ---------------- Validación de Teléfono (AbstractAPI) ----------------
+
+export async function validarTelefono(token, numero) {
+  const res = await fetch(`${API_URL}/telefonos/validar/${encodeURIComponent(numero)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.mensaje || "No se pudo validar el teléfono");
+  return data;
+}
