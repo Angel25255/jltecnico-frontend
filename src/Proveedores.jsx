@@ -108,7 +108,7 @@ export default function Proveedores({ token }) {
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <div style={estilos.encabezado}>
         <h3 style={{ margin: 0 }}>Proveedores</h3>
         <button style={estilos.botonPrimario} onClick={abrirNuevo}>+ Nuevo proveedor</button>
@@ -130,50 +130,87 @@ export default function Proveedores({ token }) {
       {cargando ? (
         <p>Cargando proveedores...</p>
       ) : (
-        <table style={estilos.tabla}>
-          <thead>
-            <tr>
-              <th style={estilos.th}>RUC</th>
-              <th style={estilos.th}>Razón Social</th>
-              <th style={estilos.th}>Contacto</th>
-              <th style={estilos.th}>Teléfono</th>
-              <th style={estilos.th}>Estado</th>
-              <th style={estilos.th}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+          <div className="vista-tarjetas-movil">
             {proveedores.length === 0 && (
-              <tr><td colSpan={6} style={estilos.tdVacio}>No hay proveedores registrados.</td></tr>
+              <p style={estilos.tdVacioMovil}>No hay proveedores registrados.</p>
             )}
             {proveedores.map((p) => (
-              <tr key={p.id}>
-                <td style={estilos.td}><code style={estilos.codigo}>{p.ruc}</code></td>
-                <td style={estilos.td}>{p.razonSocial}</td>
-                <td style={estilos.td}>{p.nombreContacto || "—"}</td>
-                <td style={estilos.td}>{p.telefono || "—"}</td>
-                <td style={estilos.td}>
+              <div key={p.id} style={estilos.tarjetaProveedor}>
+                <div style={estilos.tarjetaEncabezado}>
+                  <div>
+                    <strong style={estilos.tarjetaNombre}>{p.razonSocial}</strong>
+                    <div style={estilos.tarjetaSub}><code style={estilos.codigo}>{p.ruc}</code></div>
+                  </div>
                   <span style={p.activo ? estilos.badgeActivo : estilos.badgeInactivo}>
                     {p.activo ? "Activo" : "Inactivo"}
                   </span>
-                </td>
-                <td style={estilos.td}>
-                  <button onClick={() => abrirEditar(p)} style={estilos.botonEditar}>Editar</button>
+                </div>
+                <div style={estilos.tarjetaFila}><span>Contacto</span><span>{p.nombreContacto || "—"}</span></div>
+                <div style={estilos.tarjetaFila}><span>Teléfono</span><span>{p.telefono || "—"}</span></div>
+                <div style={estilos.tarjetaBotones}>
+                  <button onClick={() => abrirEditar(p)} style={estilos.botonEditarMovil}>Editar</button>
                   <button
                     onClick={() => manejarCambiarEstado(p)}
-                    style={p.activo ? estilos.botonDesactivar : estilos.botonActivar}
+                    style={p.activo ? estilos.botonDesactivarMovil : estilos.botonActivarMovil}
                   >
                     {p.activo ? "Desactivar" : "Activar"}
                   </button>
-                </td>
-              </tr>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+
+          {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+          <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+            <table style={estilos.tabla}>
+              <thead>
+                <tr>
+                  <th style={estilos.th}>RUC</th>
+                  <th style={estilos.th}>Razón Social</th>
+                  <th style={estilos.th}>Contacto</th>
+                  <th style={estilos.th}>Teléfono</th>
+                  <th style={estilos.th}>Estado</th>
+                  <th style={estilos.th}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {proveedores.length === 0 && (
+                  <tr><td colSpan={6} style={estilos.tdVacio}>No hay proveedores registrados.</td></tr>
+                )}
+                {proveedores.map((p) => (
+                  <tr key={p.id}>
+                    <td style={estilos.td}><code style={estilos.codigo}>{p.ruc}</code></td>
+                    <td style={estilos.td}>{p.razonSocial}</td>
+                    <td style={estilos.td}>{p.nombreContacto || "—"}</td>
+                    <td style={estilos.td}>{p.telefono || "—"}</td>
+                    <td style={estilos.td}>
+                      <span style={p.activo ? estilos.badgeActivo : estilos.badgeInactivo}>
+                        {p.activo ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
+                    <td style={estilos.td}>
+                      <button onClick={() => abrirEditar(p)} style={estilos.botonEditar}>Editar</button>
+                      <button
+                        onClick={() => manejarCambiarEstado(p)}
+                        style={p.activo ? estilos.botonDesactivar : estilos.botonActivar}
+                      >
+                        {p.activo ? "Desactivar" : "Activar"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
+      {/* A propósito NO se cierra al hacer clic afuera - solo con la ✕ o "Cancelar" */}
       {mostrarModal && (
-        <div style={estilos.overlay} onClick={() => setMostrarModal(false)}>
-          <div style={estilos.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={estilos.overlay}>
+          <div style={estilos.modal}>
             <div style={estilos.modalEncabezado}>
               <h3 style={{ margin: 0 }}>{editando ? "Editar proveedor" : "Nuevo proveedor"}</h3>
               <button style={estilos.botonCerrarModal} onClick={() => setMostrarModal(false)}>✕</button>
@@ -234,19 +271,41 @@ export default function Proveedores({ token }) {
           </div>
         </div>
       )}
+
+      <style>{`
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
 
 const estilos = {
   contenedor: { padding: "1.5rem 2rem", maxWidth: "1100px" },
-  encabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
-  barraBusqueda: { display: "flex", gap: "10px", marginBottom: "20px" },
-  inputBusqueda: { flex: 1, padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.9rem" },
+  encabezado: { display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
+  barraBusqueda: { display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" },
+  inputBusqueda: { flex: 1, minWidth: "200px", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.9rem" },
   botonPrimario: { background: "#1d4ed8", color: "#fff", border: "none", padding: "10px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: 600 },
   botonSecundario: { background: "transparent", border: "1px solid #cbd5e1", padding: "10px 16px", borderRadius: "8px", cursor: "pointer" },
   error: { color: "#dc2626", fontSize: "0.85rem" },
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+
+  // ---- Tarjetas (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaProveedor: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.9rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.78rem", color: "#64748b", marginTop: "2px" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+  tarjetaBotones: { display: "flex", gap: "8px", marginTop: "10px" },
+  botonEditarMovil: { flex: 1, background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "9px", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600 },
+  botonActivarMovil: { flex: 1, background: "#dcfce7", color: "#166534", border: "none", padding: "9px", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600 },
+  botonDesactivarMovil: { flex: 1, background: "#fee2e2", color: "#b91c1c", border: "none", padding: "9px", borderRadius: "6px", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600 },
+
+  // ---- Tabla (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "700px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.8rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.88rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
@@ -256,14 +315,15 @@ const estilos = {
   botonEditar: { background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", marginRight: "6px", fontSize: "0.8rem" },
   botonActivar: { background: "#dcfce7", color: "#166534", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.8rem" },
   botonDesactivar: { background: "#fee2e2", color: "#b91c1c", border: "none", padding: "6px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "0.8rem" },
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
-  modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "440px", maxWidth: "90vw", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
+
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
+  modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "440px", maxWidth: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
   modalEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" },
   botonCerrarModal: { background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#64748b" },
   label: { display: "block", fontSize: "0.85rem", color: "#334155", marginBottom: "4px", marginTop: "12px" },
   input: { width: "100%", padding: "9px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.95rem", boxSizing: "border-box" },
-  filaBusquedaRuc: { display: "flex", gap: "8px" },
-  botonBuscarRuc: { background: "#f59e0b", color: "#0f172a", border: "none", padding: "0 14px", borderRadius: "6px", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", whiteSpace: "nowrap" },
+  filaBusquedaRuc: { display: "flex", gap: "8px", flexWrap: "wrap" },
+  botonBuscarRuc: { background: "#f59e0b", color: "#0f172a", border: "none", padding: "9px 14px", borderRadius: "6px", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", whiteSpace: "nowrap" },
   mensajeBusqueda: { fontSize: "0.8rem", color: "#475569", marginTop: "6px" },
   modalAcciones: { display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" },
 };
