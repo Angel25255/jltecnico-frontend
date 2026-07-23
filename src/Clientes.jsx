@@ -239,7 +239,7 @@ export default function Clientes({ token }) {
       )}
 
       {mostrarModal && (
-        <div style={estilos.overlay} onClick={() => setMostrarModal(false)}>
+        <div style={estilos.overlay}>
           <div style={estilos.modal} onClick={(e) => e.stopPropagation()}>
             <div style={estilos.modalEncabezado}>
               <h3 style={{ margin: 0 }}>{clienteEditando ? "Editar cliente" : "Nuevo cliente"}</h3>
