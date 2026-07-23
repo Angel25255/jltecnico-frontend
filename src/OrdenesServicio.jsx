@@ -72,14 +72,10 @@ export default function OrdenesServicio({ token, usuario }) {
 
   async function refrescarTodo() {
     await cargar(filtroEstado);
-    if (ordenDetalle) {
-      const actualizada = ordenes.find((o) => o.id === ordenDetalle.id);
-      if (actualizada) setOrdenDetalle(actualizada);
-    }
   }
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <div style={estilos.encabezado}>
         <div>
           <h3 style={{ margin: 0 }}>{esTecnico ? "Mis Órdenes de Servicio" : "Órdenes de Servicio"}</h3>
@@ -110,44 +106,76 @@ export default function OrdenesServicio({ token, usuario }) {
       {cargando ? (
         <p>Cargando órdenes...</p>
       ) : (
-        <table style={estilos.tabla}>
-          <thead>
-            <tr>
-              <th style={estilos.th}>#</th>
-              <th style={estilos.th}>Cliente</th>
-              <th style={estilos.th}>Técnico</th>
-              <th style={estilos.th}>Descripción</th>
-              <th style={estilos.th}>Estado</th>
-              <th style={estilos.th}>Fecha</th>
-              <th style={estilos.th}></th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* ---------------- Vista de TARJETAS - solo en celular ---------------- */}
+          <div className="vista-tarjetas-movil">
             {ordenes.length === 0 && (
-              <tr><td colSpan={7} style={estilos.tdVacio}>No hay órdenes con este filtro.</td></tr>
+              <p style={estilos.tdVacioMovil}>No hay órdenes con este filtro.</p>
             )}
             {ordenes.map((o) => {
               const color = COLOR_ESTADO[o.estado] || { bg: "#f1f5f9", texto: "#334155" };
               return (
-                <tr key={o.id}>
-                  <td style={estilos.td}>{o.id}</td>
-                  <td style={estilos.td}>{o.nombreCliente}</td>
-                  <td style={estilos.td}>{o.nombreTecnico || <span style={estilos.textoSecundario}>Sin asignar</span>}</td>
-                  <td style={estilos.td}>{o.descripcion.length > 40 ? o.descripcion.slice(0, 40) + "..." : o.descripcion}</td>
-                  <td style={estilos.td}>
+                <div key={o.id} style={estilos.tarjetaOrden}>
+                  <div style={estilos.tarjetaEncabezado}>
+                    <div>
+                      <strong style={estilos.tarjetaNombre}>Orden #{o.id}</strong>
+                      <div style={estilos.tarjetaSub}>{o.nombreCliente}</div>
+                    </div>
                     <span style={{ ...estilos.badgeEstado, background: color.bg, color: color.texto }}>
                       {ETIQUETA_ESTADO[o.estado]}
                     </span>
-                  </td>
-                  <td style={estilos.td}>{new Date(o.fechaCreacion).toLocaleDateString("es-PE")}</td>
-                  <td style={estilos.td}>
-                    <button onClick={() => abrirDetalle(o)} style={estilos.botonVerDetalle}>Ver detalle</button>
-                  </td>
-                </tr>
+                  </div>
+                  <div style={estilos.tarjetaFila}><span>Técnico</span><span>{o.nombreTecnico || "Sin asignar"}</span></div>
+                  <div style={estilos.tarjetaFila}><span>Fecha</span><span>{new Date(o.fechaCreacion).toLocaleDateString("es-PE")}</span></div>
+                  <p style={estilos.tarjetaDescripcion}>{o.descripcion.length > 70 ? o.descripcion.slice(0, 70) + "..." : o.descripcion}</p>
+                  <button onClick={() => abrirDetalle(o)} style={estilos.botonVerDetalleMovil}>Ver detalle</button>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+
+          {/* ---------------- Vista de TABLA - solo en pantallas grandes ---------------- */}
+          <div style={{ overflowX: "auto" }} className="vista-tabla-escritorio">
+            <table style={estilos.tabla}>
+              <thead>
+                <tr>
+                  <th style={estilos.th}>#</th>
+                  <th style={estilos.th}>Cliente</th>
+                  <th style={estilos.th}>Técnico</th>
+                  <th style={estilos.th}>Descripción</th>
+                  <th style={estilos.th}>Estado</th>
+                  <th style={estilos.th}>Fecha</th>
+                  <th style={estilos.th}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordenes.length === 0 && (
+                  <tr><td colSpan={7} style={estilos.tdVacio}>No hay órdenes con este filtro.</td></tr>
+                )}
+                {ordenes.map((o) => {
+                  const color = COLOR_ESTADO[o.estado] || { bg: "#f1f5f9", texto: "#334155" };
+                  return (
+                    <tr key={o.id}>
+                      <td style={estilos.td}>{o.id}</td>
+                      <td style={estilos.td}>{o.nombreCliente}</td>
+                      <td style={estilos.td}>{o.nombreTecnico || <span style={estilos.textoSecundario}>Sin asignar</span>}</td>
+                      <td style={estilos.td}>{o.descripcion.length > 40 ? o.descripcion.slice(0, 40) + "..." : o.descripcion}</td>
+                      <td style={estilos.td}>
+                        <span style={{ ...estilos.badgeEstado, background: color.bg, color: color.texto }}>
+                          {ETIQUETA_ESTADO[o.estado]}
+                        </span>
+                      </td>
+                      <td style={estilos.td}>{new Date(o.fechaCreacion).toLocaleDateString("es-PE")}</td>
+                      <td style={estilos.td}>
+                        <button onClick={() => abrirDetalle(o)} style={estilos.botonVerDetalle}>Ver detalle</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {mostrarNueva && (
@@ -172,12 +200,22 @@ export default function OrdenesServicio({ token, usuario }) {
           }}
         />
       )}
+
+      <style>{`
+        .vista-tarjetas-movil { display: none; }
+        @media (max-width: 640px) {
+          .vista-tarjetas-movil { display: flex; flex-direction: column; gap: 12px; }
+          .vista-tabla-escritorio { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
 
 // -----------------------------------------------------------------
 // Modal: crear nueva orden de servicio
+// A propósito NO se cierra al hacer clic afuera - solo con la ✕ o
+// "Cancelar", para no perder lo que ya se escribió por accidente.
 // -----------------------------------------------------------------
 function ModalNuevaOrden({ token, onCerrar, onCreada }) {
   const [ventas, setVentas] = useState([]);
@@ -227,8 +265,8 @@ function ModalNuevaOrden({ token, onCerrar, onCreada }) {
   }
 
   return (
-    <div style={estilos.overlay} onClick={onCerrar}>
-      <div style={estilos.modal} onClick={(e) => e.stopPropagation()}>
+    <div style={estilos.overlay}>
+      <div style={estilos.modal}>
         <div style={estilos.modalEncabezado}>
           <h3 style={{ margin: 0 }}>Nueva orden de servicio</h3>
           <button style={estilos.botonCerrarModal} onClick={onCerrar}>✕</button>
@@ -304,6 +342,7 @@ function ModalNuevaOrden({ token, onCerrar, onCreada }) {
 
 // -----------------------------------------------------------------
 // Modal: detalle de la orden + acciones de estado + productos
+// A propósito NO se cierra al hacer clic afuera.
 // -----------------------------------------------------------------
 function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCerrar, onActualizada }) {
   const [error, setError] = useState("");
@@ -322,6 +361,23 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
   const linkSeguimiento = `${window.location.origin}/seguimiento/${orden.tokenSeguimiento}`;
   const puedeCompartirUbicacion = esTecnicoAsignado && (orden.estado === "EnCamino" || orden.estado === "EnProceso");
 
+  const [ubicacionViva, setUbicacionViva] = useState({
+    lat: orden.ubicacionTecnicoLat, lng: orden.ubicacionTecnicoLng,
+  });
+
+  useEffect(() => {
+    if (orden.estado === "Completada" || orden.estado === "Cancelada") return;
+    const intervalo = setInterval(async () => {
+      try {
+        const actualizada = await obtenerOrdenServicio(token, orden.id);
+        setUbicacionViva({ lat: actualizada.ubicacionTecnicoLat, lng: actualizada.ubicacionTecnicoLng });
+      } catch {
+        // si falla un refresco, no pasa nada, se intenta de nuevo en 15s
+      }
+    }, 15000);
+    return () => clearInterval(intervalo);
+  }, [orden.id, orden.estado]);
+
   function iniciarCompartirUbicacion() {
     if (!navigator.geolocation) {
       setError("Tu navegador no soporta geolocalización.");
@@ -331,14 +387,8 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
     watchIdRef.current = navigator.geolocation.watchPosition(
       (posicion) => {
         const { latitude, longitude } = posicion.coords;
-
-        // El mapa de ESTA pantalla se actualiza al instante, sin esperar
-        // nada (es solo una lectura local del GPS, no cuesta nada).
         setUbicacionViva({ lat: latitude, lng: longitude });
 
-        // Pero el ENVÍO al servidor sí se limita a una vez cada 15
-        // segundos, para no saturar con peticiones innecesarias -
-        // eso es lo que ven los demás (admin, cliente) al refrescar.
         const ahora = Date.now();
         if (ahora - ultimoEnvioRef.current < 15000) return;
         ultimoEnvioRef.current = ahora;
@@ -361,26 +411,6 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
     return () => { if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current); };
   }, []);
 
-  // Mientras el detalle está abierto, refresca la ubicación del
-  // técnico cada 15s (así Admin/Vendedor ven el movimiento en vivo
-  // sin necesitar el link público).
-  const [ubicacionViva, setUbicacionViva] = useState({
-    lat: orden.ubicacionTecnicoLat, lng: orden.ubicacionTecnicoLng,
-  });
-
-  useEffect(() => {
-    if (orden.estado === "Completada" || orden.estado === "Cancelada") return;
-    const intervalo = setInterval(async () => {
-      try {
-        const actualizada = await obtenerOrdenServicio(token, orden.id);
-        setUbicacionViva({ lat: actualizada.ubicacionTecnicoLat, lng: actualizada.ubicacionTecnicoLng });
-      } catch {
-        // si falla un refresco, no pasa nada, se intenta de nuevo en 15s
-      }
-    }, 15000);
-    return () => clearInterval(intervalo);
-  }, [orden.id, orden.estado]);
-
   function copiarLink() {
     navigator.clipboard.writeText(linkSeguimiento);
     setLinkCopiado(true);
@@ -389,7 +419,7 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
 
   async function manejarCambiarEstado(nuevoEstado) {
     const confirmaciones = {
-      EnCamino: "¿Marcar que el técnico ya salió hacia el lugar?",
+      EnCamino: "¿Iniciar el viaje? Esto marca la orden como 'En camino' y empieza a compartir tu ubicación en vivo.",
       EnProceso: "¿Marcar que el técnico ya llegó y empezó el trabajo?",
       Completada: "¿Marcar esta orden como completada? La boleta ya está generada, esto solo cierra la orden.",
       Cancelada: "¿Cancelar esta orden de servicio?",
@@ -401,6 +431,10 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
     try {
       const actualizada = await cambiarEstadoOrden(token, orden.id, nuevoEstado);
       onActualizada(actualizada);
+
+      if (nuevoEstado === "EnCamino" && esTecnicoAsignado) {
+        iniciarCompartirUbicacion();
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -413,7 +447,6 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
     setError("");
     try {
       await asignarTecnicoOrden(token, orden.id, tecnicoUsuarioId);
-      // recargar la orden completa (el endpoint de asignar no devuelve el item, así que refrescamos afuera)
       onActualizada({ ...orden, tecnicoUsuarioId, estado: orden.estado === "Pendiente" ? "Asignada" : orden.estado });
     } catch (err) {
       setError(err.message);
@@ -461,8 +494,8 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
   const cerrada = orden.estado === "Completada" || orden.estado === "Cancelada";
 
   return (
-    <div style={estilos.overlay} onClick={onCerrar}>
-      <div style={estilos.modalDetalle} onClick={(e) => e.stopPropagation()}>
+    <div style={estilos.overlay}>
+      <div style={estilos.modalDetalle}>
         <div style={estilos.modalEncabezado}>
           <div>
             <h3 style={{ margin: 0 }}>Orden #{orden.id}</h3>
@@ -501,7 +534,7 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
           <p style={estilos.textoDescripcion}>{orden.descripcion}</p>
         </div>
 
-        {/* Productos de la boleta ligada (mostrador + agregados en campo) */}
+        {/* Productos usados */}
         <div style={estilos.bloqueProductos}>
           <div style={estilos.encabezadoConBoton}>
             <span style={estilos.labelBloque}>Productos de la Venta #{orden.ventaId}</span>
@@ -534,7 +567,7 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
           )}
         </div>
 
-        {/* Mapa en vivo (destino + técnico + ruta), visible para todos los que pueden ver esta orden */}
+        {/* Mapa en vivo (destino + técnico + ruta) */}
         {(orden.destinoLat != null || ubicacionViva.lat != null) && (
           <div style={estilos.bloqueMapaDetalle}>
             <span style={estilos.labelBloque}>🗺️ Mapa en vivo</span>
@@ -587,7 +620,7 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
           <div style={estilos.botonesAccion}>
             {orden.estado === "Asignada" && (esTecnicoAsignado || esGestor) && (
               <button onClick={() => manejarCambiarEstado("EnCamino")} disabled={procesando} style={estilos.botonAccionPrimario}>
-                🚗 Marcar "En camino"
+                🚗 Iniciar viaje
               </button>
             )}
             {orden.estado === "EnCamino" && (esTecnicoAsignado || esGestor) && (
@@ -629,7 +662,8 @@ function ModalDetalleOrden({ token, orden, usuarioId, esGestor, esTecnico, onCer
 }
 
 // -----------------------------------------------------------------
-// Modales auxiliares de búsqueda (cliente, producto, técnico)
+// Modales auxiliares de búsqueda (producto, técnico)
+// A propósito NO se cierran al hacer clic afuera.
 // -----------------------------------------------------------------
 function ModalProductoOrden({ token, onCerrar, onSeleccionar }) {
   const [texto, setTexto] = useState("");
@@ -644,8 +678,8 @@ function ModalProductoOrden({ token, onCerrar, onSeleccionar }) {
   const resultados = t ? todos.filter((p) => p.nombre.toLowerCase().includes(t) || (p.codigo || "").toLowerCase().includes(t)) : todos;
 
   return (
-    <div style={estilos.overlay} onClick={onCerrar}>
-      <div style={estilos.modalTabla} onClick={(e) => e.stopPropagation()}>
+    <div style={estilos.overlay}>
+      <div style={estilos.modalTabla}>
         <div style={estilos.modalEncabezado}>
           <h3 style={{ margin: 0 }}>Agregar producto usado</h3>
           <button style={estilos.botonCerrarModal} onClick={onCerrar}>✕</button>
@@ -685,8 +719,8 @@ function ModalTecnicoOrden({ token, onCerrar, onSeleccionar }) {
   }, []);
 
   return (
-    <div style={estilos.overlay} onClick={onCerrar}>
-      <div style={estilos.modalTabla} onClick={(e) => e.stopPropagation()}>
+    <div style={estilos.overlay}>
+      <div style={estilos.modalTabla}>
         <div style={estilos.modalEncabezado}>
           <h3 style={{ margin: 0 }}>Asignar técnico</h3>
           <button style={estilos.botonCerrarModal} onClick={onCerrar}>✕</button>
@@ -718,7 +752,7 @@ function ModalTecnicoOrden({ token, onCerrar, onSeleccionar }) {
 
 const estilos = {
   contenedor: { padding: "1.5rem 2rem", maxWidth: "1200px" },
-  encabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" },
+  encabezado: { display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" },
   textoAyuda: { fontSize: "0.85rem", color: "#64748b", marginTop: "4px", maxWidth: "500px" },
   botonPrimario: { background: "#1d4ed8", color: "#fff", border: "none", padding: "10px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: 600 },
   botonSecundario: { background: "transparent", border: "1px solid #cbd5e1", padding: "10px 16px", borderRadius: "8px", cursor: "pointer" },
@@ -730,28 +764,35 @@ const estilos = {
   error: { color: "#dc2626", fontSize: "0.85rem", marginBottom: "12px" },
   textoSecundario: { color: "#64748b", fontSize: "0.78rem" },
 
-  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden" },
+  // ---- Tarjetas (celular) ----
+  tdVacioMovil: { padding: "30px", textAlign: "center", color: "#94a3b8" },
+  tarjetaOrden: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px" },
+  tarjetaEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" },
+  tarjetaNombre: { fontSize: "0.92rem", color: "#1e293b" },
+  tarjetaSub: { fontSize: "0.78rem", color: "#64748b", marginTop: "2px" },
+  tarjetaFila: { display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "#475569", padding: "4px 0", borderBottom: "1px solid #f8fafc" },
+  tarjetaDescripcion: { fontSize: "0.8rem", color: "#64748b", marginTop: "8px", marginBottom: "10px" },
+  botonVerDetalleMovil: { width: "100%", background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "10px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 },
+
+  // ---- Tabla (escritorio) ----
+  tabla: { width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "10px", overflow: "hidden", minWidth: "800px" },
   th: { textAlign: "left", padding: "10px", fontSize: "0.78rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   td: { padding: "10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   tdVacio: { padding: "30px", textAlign: "center", color: "#94a3b8" },
   badgeEstado: { padding: "3px 10px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 600 },
   botonVerDetalle: { background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem" },
 
-  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 },
-  modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "460px", maxWidth: "92vw", maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
-  modalDetalle: { background: "#fff", borderRadius: "14px", padding: "26px", width: "560px", maxWidth: "94vw", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" },
+  overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "16px" },
+  modal: { background: "#fff", borderRadius: "12px", padding: "24px", width: "460px", maxWidth: "100%", maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
+  modalDetalle: { background: "#fff", borderRadius: "14px", padding: "26px", width: "560px", maxWidth: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" },
   modalEncabezado: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" },
   botonCerrarModal: { background: "transparent", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#64748b" },
   label: { display: "block", fontSize: "0.85rem", color: "#334155", marginBottom: "4px", marginTop: "12px" },
   input: { width: "100%", padding: "9px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.9rem", boxSizing: "border-box", fontFamily: "inherit" },
   modalAcciones: { display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" },
 
-  botonAgregar: { width: "100%", background: "#eff6ff", border: "1px dashed #93c5fd", color: "#1d4ed8", padding: "12px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 },
-  clienteSeleccionado: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "#eff6ff", padding: "10px 12px", borderRadius: "8px" },
-  botonCambiar: { background: "transparent", border: "1px solid #93c5fd", color: "#1d4ed8", padding: "5px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem" },
-
   bloqueInfo: { background: "#f8fafc", borderRadius: "10px", padding: "14px 16px", marginBottom: "14px" },
-  filaInfo: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", color: "#475569", padding: "5px 0" },
+  filaInfo: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", color: "#475569", padding: "5px 0", flexWrap: "wrap", gap: "6px" },
   botonCambiarChico: { marginLeft: "8px", background: "#eff6ff", color: "#1d4ed8", border: "none", padding: "3px 8px", borderRadius: "5px", cursor: "pointer", fontSize: "0.7rem" },
 
   bloqueDescripcion: { marginBottom: "14px" },
@@ -759,43 +800,38 @@ const estilos = {
   textoDescripcion: { fontSize: "0.87rem", color: "#334155", marginTop: "6px", lineHeight: 1.5 },
 
   bloqueProductos: { background: "#f8fafc", borderRadius: "10px", padding: "14px 16px", marginBottom: "14px" },
-  encabezadoConBoton: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" },
+  encabezadoConBoton: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" },
   botonAgregarChico: { background: "#eff6ff", color: "#1d4ed8", border: "1px solid #93c5fd", padding: "5px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600 },
-  filaProducto: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", padding: "6px 0", borderBottom: "1px solid #f1f5f9" },
+  filaProducto: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", padding: "6px 0", borderBottom: "1px solid #f1f5f9", flexWrap: "wrap", gap: "6px" },
   subtotalProducto: { fontWeight: 600, marginLeft: "auto", marginRight: "10px" },
-  badgeEnCampo: { fontSize: "0.68rem", color: "#a21caf", background: "#fce7f3", padding: "1px 6px", borderRadius: "999px", marginLeft: "8px" },
   botonQuitarChico: { background: "#fee2e2", color: "#b91c1c", border: "none", borderRadius: "5px", width: "22px", height: "22px", cursor: "pointer", fontSize: "0.7rem" },
-  totalProductos: { display: "flex", justifyContent: "space-between", paddingTop: "8px", marginTop: "6px", borderTop: "1px solid #e2e8f0", fontSize: "0.9rem" },
-
-  bloqueVentaGenerada: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "#dcfce7", color: "#166534", padding: "10px 14px", borderRadius: "8px", marginBottom: "14px", fontSize: "0.85rem", fontWeight: 600 },
+  totalProductos: { display: "flex", justifyContent: "space-between", paddingTop: "8px", marginTop: "6px", borderTop: "1px solid #e2e8f0", fontSize: "0.9rem", flexWrap: "wrap", gap: "6px" },
+  badgeEnCampo: { fontSize: "0.68rem", color: "#a21caf", background: "#fce7f3", padding: "1px 6px", borderRadius: "999px", marginLeft: "8px" },
 
   bloqueMapaDetalle: { marginBottom: "14px" },
+
+  bloqueVentaGenerada: { display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "space-between", alignItems: "center", background: "#dcfce7", color: "#166534", padding: "10px 14px", borderRadius: "8px", marginBottom: "14px", fontSize: "0.85rem", fontWeight: 600 },
+  botonDescargarBoleta: { background: "#166534", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem" },
+
   bloqueSeguimiento: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px 14px", marginBottom: "14px" },
-  filaLink: { display: "flex", gap: "8px", marginTop: "6px" },
-  inputLink: { flex: 1, padding: "8px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.78rem", color: "#475569", background: "#fff" },
+  filaLink: { display: "flex", gap: "8px", marginTop: "6px", flexWrap: "wrap" },
+  inputLink: { flex: 1, minWidth: "180px", padding: "8px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.78rem", color: "#475569", background: "#fff" },
   botonCopiarLink: { background: "#1d4ed8", color: "#fff", border: "none", padding: "8px 14px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, whiteSpace: "nowrap" },
 
   bloqueGps: { marginBottom: "14px" },
   botonCompartirGps: { width: "100%", background: "#fffbeb", border: "1px solid #f59e0b", color: "#92400e", padding: "12px", borderRadius: "8px", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" },
   botonDetenerGps: { width: "100%", background: "#fee2e2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "12px", borderRadius: "8px", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" },
   avisoCompartiendo: { fontSize: "0.75rem", color: "#92400e", textAlign: "center", marginTop: "6px" },
-  botonDescargarBoleta: { background: "#166534", color: "#fff", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem" },
 
   botonesAccion: { display: "flex", flexDirection: "column", gap: "8px", marginTop: "16px" },
   botonAccionPrimario: { background: "#1d4ed8", color: "#fff", border: "none", padding: "12px", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "0.88rem" },
   botonCompletar: { background: "#166534", color: "#fff", border: "none", padding: "12px", borderRadius: "8px", cursor: "pointer", fontWeight: 700, fontSize: "0.88rem" },
   botonCancelar: { background: "transparent", border: "1px solid #fca5a5", color: "#b91c1c", padding: "10px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem" },
 
-  modalTabla: { background: "#fff", borderRadius: "12px", padding: "24px", width: "600px", maxWidth: "94vw", maxHeight: "80vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
+  modalTabla: { background: "#fff", borderRadius: "12px", padding: "24px", width: "600px", maxWidth: "100%", maxHeight: "80vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" },
   contenedorTablaModal: { overflowY: "auto", flex: 1 },
   tablaModal: { width: "100%", borderCollapse: "collapse" },
   thModal: { textAlign: "left", padding: "8px 10px", fontSize: "0.75rem", color: "#64748b", borderBottom: "2px solid #e2e8f0", background: "#f8fafc" },
   tdModal: { padding: "8px 10px", fontSize: "0.85rem", borderBottom: "1px solid #f1f5f9" },
   botonSeleccionarModal: { background: "#1d4ed8", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "6px", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600 },
-
-  panelExterno: { marginTop: "14px", paddingTop: "14px", borderTop: "1px dashed #e2e8f0" },
-  botonBuscarExterno: { width: "100%", background: "#fffbeb", border: "1px dashed #f59e0b", color: "#92400e", padding: "12px", borderRadius: "8px", cursor: "pointer", fontSize: "0.83rem", fontWeight: 600 },
-  mensajeExterno: { fontSize: "0.8rem", color: "#92400e", marginTop: "8px" },
-  tarjetaExterno: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "14px", marginTop: "10px" },
-  botonRegistrarUsar: { width: "100%", marginTop: "10px", background: "#166534", color: "#fff", border: "none", padding: "10px", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" },
 };

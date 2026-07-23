@@ -20,8 +20,14 @@ import { cerrarSesion, obtenerSesiones, obtenerMisPermisos } from "./authApi";
 import { useInactividad } from "./useInactividad";
 
 function App() {
-  const [token, setToken] = useState(null);
-  const [usuario, setUsuario] = useState(null);
+  // La sesión se guarda en sessionStorage (se borra sola al cerrar la
+  // pestaña/navegador, pero SOBREVIVE a un simple F5/recarga - antes
+  // vivía solo en memoria y cualquier recarga cerraba la sesión).
+  const [token, setToken] = useState(() => sessionStorage.getItem("jl_token") || null);
+  const [usuario, setUsuario] = useState(() => {
+    const guardado = sessionStorage.getItem("jl_usuario");
+    return guardado ? JSON.parse(guardado) : null;
+  });
   const [pantalla, setPantalla] = useState("sesiones");
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [gruposAbiertos, setGruposAbiertos] = useState({ sprint1: true, sprint2: true, sprint3: true, sprint4: true });
@@ -52,6 +58,8 @@ function App() {
     } finally {
       setToken(null);
       setUsuario(null);
+      sessionStorage.removeItem("jl_token");
+      sessionStorage.removeItem("jl_usuario");
       setCerrandoSesion(false);
     }
   }
@@ -69,6 +77,8 @@ function App() {
         onLoginExitoso={(t, nombre, rol) => {
           setToken(t);
           setUsuario({ nombre, rol });
+          sessionStorage.setItem("jl_token", t);
+          sessionStorage.setItem("jl_usuario", JSON.stringify({ nombre, rol }));
           // El Administrador entra directo al Panel Gerencial (Sprint 4);
           // los demás roles siguen viendo Sesiones activas como antes.
           if (rol === "Administrador") setPantalla("dashboard");
