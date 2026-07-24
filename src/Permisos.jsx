@@ -3,11 +3,18 @@ import { obtenerMatrizPermisos, actualizarPermiso } from "./authApi";
 
 const INFO_MODULO = {
   Clientes: { nombre: "Clientes", icono: "👥", color: "#1d4ed8" },
+  Productos: { nombre: "Productos", icono: "📦", color: "#0891b2" },
+  Categorias: { nombre: "Categorías", icono: "🗂️", color: "#0891b2" },
   Ventas: { nombre: "Ventas", icono: "💵", color: "#166534" },
   Cotizaciones: { nombre: "Cotizaciones", icono: "📄", color: "#92400e" },
   Reportes: { nombre: "Reportes Comerciales", icono: "📊", color: "#7c3aed" },
-  Inventario: { nombre: "Inventario", icono: "📦", color: "#0891b2" },
+  Proveedores: { nombre: "Proveedores", icono: "🏭", color: "#7c3aed" },
+  Compras: { nombre: "Compras", icono: "🛒", color: "#7c3aed" },
+  Kardex: { nombre: "Kardex", icono: "📋", color: "#7c3aed" },
+  GestionTecnicos: { nombre: "Gestión de Técnicos", icono: "👷", color: "#a21caf" },
   OrdenesServicio: { nombre: "Órdenes de Servicio", icono: "🛠️", color: "#a21caf" },
+  // Se dejan por si aparecen en instalaciones viejas, aunque ya no se usan
+  Inventario: { nombre: "Inventario (heredado)", icono: "📦", color: "#94a3b8" },
 };
 
 function Switch({ activo, cargando, onClick }) {
@@ -68,17 +75,20 @@ export default function Permisos({ token }) {
 
   if (cargando) return <div style={{ padding: "1.5rem 2rem", color: "#94a3b8" }}>Cargando permisos...</div>;
 
-  const porModulo = permisos.reduce((acc, p) => {
+  const porModulo = permisos
+    .filter((p) => p.modulo !== "Inventario") // heredado, ya no lo usa ningún controller
+    .reduce((acc, p) => {
     (acc[p.modulo] = acc[p.modulo] || []).push(p);
     return acc;
   }, {});
 
-  const totalPermisos = permisos.length;
-  const totalVendedor = permisos.filter((p) => p.vendedorPermitido).length;
-  const totalTecnico = permisos.filter((p) => p.tecnicoPermitido).length;
+  const permisosVigentes = permisos.filter((p) => p.modulo !== "Inventario");
+  const totalPermisos = permisosVigentes.length;
+  const totalVendedor = permisosVigentes.filter((p) => p.vendedorPermitido).length;
+  const totalTecnico = permisosVigentes.filter((p) => p.tecnicoPermitido).length;
 
   return (
-    <div style={estilos.contenedor}>
+    <div style={estilos.contenedor} className="modulo-responsive">
       <div style={estilos.encabezado}>
         <div>
           <h3 style={{ margin: 0 }}>Roles y Permisos</h3>
@@ -92,7 +102,7 @@ export default function Permisos({ token }) {
       </div>
 
       {/* Resumen de cuántos permisos tiene activos cada rol */}
-      <div style={estilos.gridResumen}>
+      <div style={estilos.gridResumen} className="grid-2col-responsive">
         <div style={estilos.tarjetaResumen}>
           <span style={estilos.labelResumen}>Vendedor</span>
           <span style={estilos.valorResumen}>{totalVendedor} <small style={estilos.deTotalResumen}>de {totalPermisos}</small></span>
@@ -150,6 +160,17 @@ export default function Permisos({ token }) {
           );
         })}
       </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .grid-2col-responsive {
+            display: block !important;
+          }
+          .grid-2col-responsive > * {
+            margin-bottom: 16px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
